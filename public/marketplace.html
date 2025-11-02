@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketplace</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Marketplace</h1>
+
+  <!-- Product container -->
+  <div class="product-grid"></div>
+
+  <!-- Product fetching script -->
+  <script>
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/products'); // API route from your backend
+        const products = await res.json();
+        const container = document.querySelector('.product-grid');
+        container.innerHTML = '';
+
+        products.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+          card.innerHTML = `
+            <img src="${p.img || 'default.jpg'}" alt="${p.title}">
+            <h3>${p.title || 'Untitled Product'}</h3>
+            <p><strong>Subject:</strong> ${p.subject || 'N/A'}</p>
+            <p><strong>Location:</strong> ${p.location || 'Not specified'}</p>
+            <p><strong>Price:</strong> ₹${p.price || 0}</p>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error loading products:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+</body>
+</html>

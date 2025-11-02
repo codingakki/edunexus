@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find Your Perfect Tutor | Edunexus</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f7f8fb;
+      margin: 0;
+      text-align: center;
+    }
+
+    h1 {
+      background: linear-gradient(90deg, #4f46e5, #6366f1);
+      color: white;
+      padding: 20px;
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      padding: 30px;
+      width: 260px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #4338ca;
+    }
+
+    /* ===== MODALS ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 380px;
+      text-align: left;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+      from {transform: scale(0.8); opacity: 0;}
+      to {transform: scale(1); opacity: 1;}
+    }
+
+    .modal-content input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .close {
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+      color: #555;
+    }
+
+    footer {
+      background: #4f46e5;
+      color: white;
+      padding: 10px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      font-size: 14px;
+    }
+
+    /* ===== SUCCESS POPUP ===== */
+    .success-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      z-index: 200;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translate(-50%, -60%);}
+      to {opacity: 1; transform: translate(-50%, -50%);}
+    }
+
+    .success-popup h3 {
+      color: #10b981;
+      margin-bottom: 10px;
+    }
+
+    .success-popup button {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .success-popup button:hover {
+      background: #4338ca;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎓 Find Your Perfect Tutor</h1>
+
+  <div class="cards">
+    <div class="card">
+      <img src="images/student.jpg" alt="Want to study">
+      <h2>Want to Study</h2>
+      <p>Browse qualified tutors based on your subject and location.</p>
+      <button class="btn" onclick="openModal('study')">Register</button>
+    </div>
+
+    <div class="card">
+      <img src="images/teacher.jpg" alt="Want to Teach">
+      <h2>Want to Teach</h2>
+      <p>Register as a tutor and connect with students who need your expertise.</p>
+      <button class="btn" onclick="openModal('teach')">Register</button>
+    </div>
+  </div>
+
+  <!-- STUDY MODAL -->
+  <div id="studyModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('study')">&times;</span>
+      <h3>Student Registration</h3>
+      <form id="studyForm">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="subject" placeholder="Subject" required>
+        <input type="text" name="location" placeholder="Location" required>
+        <button class="btn" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TEACH MODAL -->
+  <div id="teachModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('teach')">&times;</span>
+      <h3>Tutor Registration</h3>
+      <form id="teachForm">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="expertise" placeholder="Subject Expertise" required>
+        <input type="text" name="location" placeholder="Location" required>
+        <button class="btn" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SUCCESS POPUP -->
+  <div id="successPopup" class="success-popup">
+    <h3>🎉 Successfully Registered!</h3>
+    <p>Your details have been submitted.</p>
+    <button onclick="closeSuccess()">OK</button>
+  </div>
+
+  <footer>© 2025 Edunexus</footer>
+
+  <script>
+    // ==== OPEN / CLOSE MODALS ====
+    function openModal(type) {
+      document.getElementById(type + 'Modal').style.display = 'flex';
+    }
+
+    function closeModal(type) {
+      document.getElementById(type + 'Modal').style.display = 'none';
+    }
+
+    // ==== SUCCESS POPUP ====
+    function showSuccess() {
+      const popup = document.getElementById("successPopup");
+      popup.style.display = "block";
+      setTimeout(() => popup.style.display = "none", 3000);
+    }
+
+    function closeSuccess() {
+      document.getElementById("successPopup").style.display = "none";
+    }
+
+    // ==== FORM SUBMISSION ====
+    async function handleSubmit(formId, endpoint) {
+      const form = document.getElementById(formId);
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          form.reset();
+          closeModal(formId.includes("study") ? "study" : "teach");
+          showSuccess();
+        } else {
+          alert("❌ Something went wrong. Try again!");
+        }
+      });
+    }
+
+    handleSubmit("studyForm", "/api/students");
+    handleSubmit("teachForm", "/api/tutors");
+  </script>
+</body>
+</html>

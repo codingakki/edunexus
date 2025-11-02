@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment - Edunexus</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <h2>Payment</h2>
+    <p id="paymentSummary">Preparing payment...</p>
+    <button id="payBtn" class="btn btn-primary">Pay Now</button>
+  </main>
+
+  <!-- Razorpay checkout script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    async function prepare() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if (!cart.length) {
+        alert('Cart empty');
+        window.location.href = '/';
+        return;
+      }
+      const total = cart.reduce((s, i) => s + Number(i.price), 0);
+      document.getElementById('paymentSummary').innerText =
+        `Pay ₹${total} for ${cart.length} item(s).`;
+    }
+
+    document.getElementById('payBtn').addEventListener('click', async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        localStorage.setItem('returnTo', '/payment.html');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const total = cart.reduce((s, i) => s + Number(i.price), 0);
+
+      // 1) create order on server (mocked for now)
+      const res = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ amount: total })
+      });
+      if (!res.ok) {
+        alert('Failed to create order');
+        return;
+      }
+      const order = await res.json();
+
+      // 🔹 Mock payment success (testing without Razorpay)
+      alert('Simulating payment success...');
+      const fakeResponse = {
+        razorpay_payment_id: "pay_test123",
+        razorpay_order_id: "order_test123",
+        razorpay_signature: "sig_test123"
+      };
+
+      // Directly call backend purchase recording
+      const productIds = cart.map(i => i.id);
+      const r = await fetch('/api/purchases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ productIds, payment: fakeResponse })
+      });
+      if (!r.ok) {
+        alert('Payment record failed');
+        return;
+      }
+      localStorage.removeItem('cart');
+      alert('Fake payment successful — materials unlocked');
+      window.location.href = '/';
+    });
+
+    // ✅ Initialize payment summary on load
+    prepare();
+  </script>
+</body>
+</html>

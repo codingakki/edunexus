@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>Add Product Test</h3>
+<form id="form">
+  <input type="text" name="name" placeholder="Product Name" required><br><br>
+  <input type="number" name="price" placeholder="Price" required><br><br>
+  <input type="text" name="description" placeholder="Description" required><br><br>
+  <input type="text" name="category" placeholder="Category"><br><br>
+  <button type="submit">Add Product</button>
+</form>
+
+<script>
+document.getElementById("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+
+  const res = await fetch("http://localhost:5000/api/products/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+  alert(JSON.stringify(result, null, 2));
+});
+</script>
+</body>
+</html>

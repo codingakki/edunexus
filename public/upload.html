@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Product - Edunexus</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 15px;
+    }
+    input, button, label {
+      font-size: 15px;
+    }
+    input, select, textarea {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    input[type="file"] {
+      border: none;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h2>Upload Product</h2>
+    <form id="uploadForm">
+      <input name="title" placeholder="Title" required />
+      <input name="subject" placeholder="Subject" />
+      <input name="price" type="number" placeholder="Price (₹)" />
+      <input name="location" placeholder="Location" />
+      <input name="img" placeholder="Cover Image URL (optional)" />
+      
+      <label>Attach File (PDF / DOCX / ZIP)</label>
+      <input name="file" type="file" accept=".pdf,.zip,.doc,.docx" required />
+      
+      <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+  </main>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('⚠️ Please login as teacher/admin to upload');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const formData = new FormData(e.target);
+
+      try {
+        const res = await fetch('/api/uploads/product', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token
+          },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+        alert('✅ Product uploaded successfully!');
+        e.target.reset();
+        window.location.href = '/'; // Redirect to homepage or product list
+      } catch (err) {
+        alert('❌ ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

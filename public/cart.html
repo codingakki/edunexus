@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cart - Edunexus</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><a href="/">← Back to shop</a></header>
+  <main class="container">
+    <h2>Your Cart</h2>
+    <div id="cartItems"></div>
+    <div id="cartFooter" style="margin-top:18px">
+      <strong id="cartTotal"></strong>
+      <div style="margin-top:10px">
+        <button id="checkoutBtn" class="btn btn-primary">Checkout</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // render cart
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const el = document.getElementById('cartItems');
+      if (!cart.length) {
+        el.innerHTML = '<p>Your cart is empty.</p>';
+        document.getElementById('cartTotal').innerText = '';
+        document.getElementById('checkoutBtn').disabled = true;
+        return;
+      }
+      el.innerHTML = cart.map(it => `
+        <div class="cart-row">
+          <img src="${it.image}" style="width:80px;height:60px;object-fit:cover;margin-right:12px" />
+          <strong>${it.name}</strong>
+          <span style="margin-left:auto">₹${it.price}</span>
+        </div>
+      `).join('');
+      const total = cart.reduce((s,i) => s + Number(i.price), 0);
+      document.getElementById('cartTotal').innerText = 'Total: ₹' + total;
+      document.getElementById('checkoutBtn').disabled = false;
+    }
+
+    document.getElementById('checkoutBtn').addEventListener('click', () => {
+      const user = localStorage.getItem('token');
+      if (!user) {
+        // remember where to return and redirect to login
+        localStorage.setItem('returnTo', '/cart.html');
+        window.location.href = '/login.html';
+        return;
+      }
+      // proceed to payment page
+      window.location.href = '/payment.html';
+    });
+
+    renderCart();
+  </script>
+</body>
+</html>
