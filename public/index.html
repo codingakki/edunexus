@@ -3,96 +3,78 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Edunexus - Marketplace</title>
+  <title>Edunexus - Learn, Connect, Grow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <div class="header-inner">
       <div class="logo">Edunexus</div>
-    <nav>
-  <a href="marketplace.html">Marketplace</a>
-
-  <a href="/tutor.html">Tutor</a>
-  <a href="contact.html">Contact</a>
-
-
-  <a href="login.html" id="loginLink">Login</a>
-</nav>
-
+      <nav>
+        <a href="marketplace.html">Marketplace</a>
+        <a href="tutor.html">Connect</a> 
+        <a href="contact.html">Contact</a>
+        <a href="login.html" id="loginLink" class="btn-login">Login</a>
+      </nav>
     </div>
   </header>
-  <section id="home-products" style="padding:2rem;">
-  <h2>📚 Featured Marketplace Items</h2>
-  <div class="products" id="productPreview"></div>
-  <a href="marketplace.html" style="display:block;margin-top:1rem;color:#2563eb;text-decoration:none;">View All ➜</a>
-</section>
 
-<script>
-  async function loadPreviewProducts() {
-    const container = document.getElementById('productPreview');
-    try {
-      const res = await fetch('http://localhost:5000/api/products');
-      const data = await res.json();
+  <section id="hero">
+    <div class="hero-content">
+      <h1>Unlock Your Learning Potential</h1>
+      <p>Find top-quality notes, connect with tutors, and master any subject, anywhere.</p>
+      <a href="marketplace.html" class="btn-primary">Explore Marketplace</a>
+      <a href="/connect.html" class="btn-secondary">Find a Tutor</a>
+    </div>
+  </section>
 
-      if (!data.length) {
-        container.innerHTML = "<p>No products available yet.</p>";
-        return;
-      }
-
-      // Show only first 3 products
-      container.innerHTML = data.slice(0, 3).map(p => `
-        <div class="card" style="background:#fff;padding:1rem;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.1);margin-bottom:1rem;">
-          <h3>${p.title}</h3>
-          <p><strong>Subject:</strong> ${p.subject || "N/A"}</p>
-          <p style="color:#16a34a;font-weight:bold;">₹ ${p.price}</p>
-          <p><strong>Location:</strong> ${p.location || "N/A"}</p>
-        </div>
-      `).join('');
-    } catch (error) {
-      container.innerHTML = "<p>Failed to load products.</p>";
-      console.error(error);
-    }
-  }
-
-  loadPreviewProducts();
-</script>
-
-
-  <main>
-    <section id="marketplace">
-  <h2>📘 Marketplace</h2>
-  <div id="productList"></div>
-</section>
-
-  </main>
+  <section id="featured-products">
+    <h2>✨ Top Study Resources</h2>
+    <div class="products-grid" id="productPreview">
+      </div>
+    <div class="view-all-container">
+      <a href="marketplace.html" class="view-all-link">View All Products ➜</a>
+    </div>
+  </section>
 
   <footer>
-    <small>© <span id="year"></span> Edunexus</small>
+    <small>© <span id="year">2025</span> Edunexus. All rights reserved.</small>
   </footer>
 
-  <script src="script.js"></script>
   <script>
-async function loadProducts() {
-  const res = await fetch("http://localhost:5000/api/products");
-  const data = await res.json();
-  const container = document.getElementById("product-list");
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-  container.innerHTML = "";
-  data.forEach(p => {
-    container.innerHTML += `
-      <div class="product-card">
-        <img src="${p.image}" alt="${p.name}" />
-        <h3>${p.name}</h3>
-        <p>${p.description}</p>
-        <span>₹${p.price}</span>
-      </div>
-    `;
-  });
-}
+    async function loadPreviewProducts() {
+      const container = document.getElementById('productPreview');
+      try {
+        const res = await fetch('http://localhost:5000/api/products');
+        const data = await res.json();
 
-window.onload = loadProducts;
-</script>
+        if (!data.length) {
+          container.innerHTML = "<p class='empty-state'>No featured products available yet.</p>";
+          return;
+        }
 
+        // Show only first 3 products
+        container.innerHTML = data.slice(0, 3).map(p => `
+          <div class="product-card">
+            <h3>${p.title}</h3>
+            <p class="subject-tag">Subject: ${p.subject || "N/A"}</p>
+            <div class="price-location">
+              <span class="price">₹ ${p.price}</span>
+              <span class="location">${p.location || "N/A"}</span>
+            </div>
+            <button class="btn-add-to-cart">Add to Cart</button>
+          </div>
+        `).join('');
+      } catch (error) {
+        container.innerHTML = "<p class='empty-state'>Failed to load products. Server is offline.</p>";
+        console.error(error);
+      }
+    }
+
+    loadPreviewProducts();
+  </script>
 </body>
 </html>
