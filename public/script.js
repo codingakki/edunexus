@@ -10,7 +10,7 @@ function attachAddToCartHandlers() {
   document.querySelectorAll(".add-to-cart, .btn-add-to-cart").forEach(btn => {
     btn.addEventListener("click", async () => {
       const productId = btn.dataset.productId;
-      const userId = "demo-user-123"; // TODO: Replace with actual logged-in user ID
+      const userId = "690729d071ca7c0986aef43e"; // TODO: Replace with actual logged-in user ID
 
       if (!productId) {
         console.error("No product ID found on button");
