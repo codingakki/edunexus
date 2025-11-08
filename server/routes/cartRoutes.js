@@ -3,7 +3,7 @@ import Cart from "../models/Cart.js";
 
 const router = express.Router();
 
-// 🛒 Add to Cart
+// 🛒 Add to Cart (You already have this)
 router.post("/add", async (req, res) => {
   try {
     const { userId, productId } = req.body;
@@ -35,5 +35,32 @@ router.post("/add", async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
+// ===============================================
+// ✅ ADD THIS NEW ROUTE
+// ===============================================
+// 🛍️ Get User's Cart
+router.get("/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Find the cart and 'populate' the product details
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      model: "Product", // Tell Mongoose which model to use
+    });
+
+    if (!cart) {
+      // Send an empty cart structure if no cart is found
+      return res.json({ items: [] });
+    }
+
+    res.json(cart);
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 
 export default router;

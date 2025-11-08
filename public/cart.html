@@ -1,60 +1,140 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cart - Edunexus</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart - Edunexus</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* You can move these styles to style.css */
+    .cart-container {
+      width: 90%;
+      max-width: 800px;
+      margin: 2rem auto;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding: 1rem 0;
+    }
+    .cart-item-img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 1rem;
+    }
+    .cart-item-details {
+      flex-grow: 1;
+    }
+    .cart-total {
+      text-align: right;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+    .checkout-btn {
+      background-color: #6a1b9a;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: block;
+      width: 200px;
+      margin: 1rem 0 0 auto;
+      text-align: center;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-  <header><a href="/">← Back to shop</a></header>
-  <main class="container">
-    <h2>Your Cart</h2>
-    <div id="cartItems"></div>
-    <div id="cartFooter" style="margin-top:18px">
-      <strong id="cartTotal"></strong>
-      <div style="margin-top:10px">
-        <button id="checkoutBtn" class="btn btn-primary">Checkout</button>
-      </div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">Edunexus</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="marketplace.html">Marketplace</a>
+        <a href="contact.html">Contact</a>
+      </nav>
     </div>
+  </header>
+
+  <main class="cart-container">
+    <a href="marketplace.html">← Back to shop</a>
+    <h1>Your Cart</h1>
+    
+    <div id="cart-items-container">
+      <p>Loading your cart...</p>
+    </div>
+    
+    <div id="cart-summary" style="display: none;">
+      <div id="cart-total">Total: ₹0.00</div>
+      <a href="payment.html" class="checkout-btn">Checkout</a>
+    </div>
+
   </main>
 
   <script>
-    // render cart
-    function renderCart() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const el = document.getElementById('cartItems');
-      if (!cart.length) {
-        el.innerHTML = '<p>Your cart is empty.</p>';
-        document.getElementById('cartTotal').innerText = '';
-        document.getElementById('checkoutBtn').disabled = true;
-        return;
-      }
-      el.innerHTML = cart.map(it => `
-        <div class="cart-row">
-          <img src="${it.image}" style="width:80px;height:60px;object-fit:cover;margin-right:12px" />
-          <strong>${it.name}</strong>
-          <span style="margin-left:auto">₹${it.price}</span>
-        </div>
-      `).join('');
-      const total = cart.reduce((s,i) => s + Number(i.price), 0);
-      document.getElementById('cartTotal').innerText = 'Total: ₹' + total;
-      document.getElementById('checkoutBtn').disabled = false;
-    }
+    // Define your API base URL and the (currently hardcoded) User ID
+    const API_BASE = "https://edunexus-1-ewni.onrender.com";
+    const USER_ID = "673a45d9f82e7123fefb77b9"; // Use the same valid ObjectId
 
-    document.getElementById('checkoutBtn').addEventListener('click', () => {
-      const user = localStorage.getItem('token');
-      if (!user) {
-        // remember where to return and redirect to login
-        localStorage.setItem('returnTo', '/cart.html');
-        window.location.href = '/login.html';
-        return;
-      }
-      // proceed to payment page
-      window.location.href = '/payment.html';
+    document.addEventListener("DOMContentLoaded", () => {
+      loadCartItems();
     });
 
-    renderCart();
+    async function loadCartItems() {
+      const container = document.getElementById("cart-items-container");
+      const summary = document.getElementById("cart-summary");
+      const totalEl = document.getElementById("cart-total");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/cart/${USER_ID}`);
+        if (!res.ok) throw new Error("Failed to fetch cart");
+        
+        const cart = await res.json();
+        
+        if (!cart.items || cart.items.length === 0) {
+          container.innerHTML = "<p>Your cart is empty.</p>";
+          return;
+        }
+
+        // Clear loading message
+        container.innerHTML = "";
+        let totalPrice = 0;
+
+        // Loop through items and render them
+        cart.items.forEach(item => {
+          const product = item.productId; // This is the populated product object
+          if (!product) return; // Skip if product was deleted
+
+          totalPrice += (product.price || 0) * (item.quantity || 1);
+
+          container.innerHTML += `
+            <div class="cart-item">
+              <img src="${product.img || 'default.jpg'}" alt="${product.title}" class="cart-item-img">
+              <div class="cart-item-details">
+                <h3>${product.title}</h3>
+                <p>Price: ₹${product.price}</p>
+                <p>Quantity: ${item.quantity}</p>
+              </div>
+            </div>
+          `;
+        });
+
+        // Show summary and total
+        totalEl.textContent = `Total: ₹${totalPrice.toFixed(2)}`;
+        summary.style.display = "block";
+
+      } catch (error) {
+        console.error("Error loading cart:", error);
+        container.innerHTML = "<p>⚠️ Could not load your cart. Please try again.</p>";
+      }
+    }
   </script>
+
 </body>
 </html>
