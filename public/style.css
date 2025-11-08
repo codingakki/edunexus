@@ -275,3 +275,41 @@ footer small {
         grid-template-columns: 1fr; /* Stack cards on mobile */
     }
 }
+
+footer small {
+    font-size: 0.9rem;
+}
+
+/* --- Empty State --- */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #888;
+}
+
+/* --- Responsive adjustments --- */
+@media (max-width: 768px) {
+    .header-inner {
+        flex-direction: column;
+        padding: 1rem 1rem 0.5rem 1rem;
+    }
+    nav {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    nav a {
+        margin: 0 0.5rem;
+        padding: 0.5rem;
+    }
+    #hero {
+        padding: 4rem 1rem;
+    }
+    #hero h1 {
+        font-size: 2rem;
+    }
+    .products-grid {
+        grid-template-columns: 1fr; /* Stack cards on mobile */
+    }
+}

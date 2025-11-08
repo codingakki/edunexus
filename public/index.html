@@ -13,7 +13,11 @@
       <div class="logo">Edunexus</div>
       <nav>
         <a href="marketplace.html">Marketplace</a>
+<<<<<<< HEAD
         <a href="tutor.html">Connect</a> 
+=======
+        <a href="tutor.html">Connect</a>
+>>>>>>> 269c14ecc444a8bffda6145aa616408aba95dd70
         <a href="contact.html">Contact</a>
         <a href="login.html" id="loginLink" class="btn-login">Login</a>
       </nav>
@@ -25,13 +29,22 @@
       <h1>Unlock Your Learning Potential</h1>
       <p>Find top-quality notes, connect with tutors, and master any subject, anywhere.</p>
       <a href="marketplace.html" class="btn-primary">Explore Marketplace</a>
+<<<<<<< HEAD
       <a href="tutor.html" class="btn-secondary">Find a Tutor</a>
+=======
+      <a href="/connect.html" class="btn-secondary">Find a Tutor</a>
+>>>>>>> 269c14ecc444a8bffda6145aa616408aba95dd70
     </div>
   </section>
 
   <section id="featured-products">
     <h2>✨ Top Study Resources</h2>
+<<<<<<< HEAD
     <div class="products-grid" id="productPreview"></div>
+=======
+    <div class="products-grid" id="productPreview">
+      </div>
+>>>>>>> 269c14ecc444a8bffda6145aa616408aba95dd70
     <div class="view-all-container">
       <a href="marketplace.html" class="view-all-link">View All Products ➜</a>
     </div>
@@ -41,7 +54,39 @@
     <small>© <span id="year">2025</span> Edunexus. All rights reserved.</small>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
 
+    async function loadPreviewProducts() {
+      const container = document.getElementById('productPreview');
+      try {
+        const res = await fetch('http://localhost:5000/api/products');
+        const data = await res.json();
+
+        if (!data.length) {
+          container.innerHTML = "<p class='empty-state'>No featured products available yet.</p>";
+          return;
+        }
+
+        // Show only first 3 products
+        container.innerHTML = data.slice(0, 3).map(p => `
+          <div class="product-card">
+            <h3>${p.title}</h3>
+            <p class="subject-tag">Subject: ${p.subject || "N/A"}</p>
+            <div class="price-location">
+              <span class="price">₹ ${p.price}</span>
+              <span class="location">${p.location || "N/A"}</span>
+            </div>
+            <button class="btn-add-to-cart">Add to Cart</button>
+          </div>
+        `).join('');
+      } catch (error) {
+        container.innerHTML = "<p class='empty-state'>Failed to load products. Server is offline.</p>";
+        console.error(error);
+      }
+    }
+
+    loadPreviewProducts();
+  </script>
 </body>
 </html>
