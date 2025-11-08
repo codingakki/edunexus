@@ -42,6 +42,7 @@ import userRoutes from "./routes/userRoutes.js";
 import purchaseRoutes from "./routes/purchaseRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 
 // ✅ Use routes
 app.use("/api/products", productRoutes);
@@ -52,6 +53,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/cart", cartRoutes);
 
 // ✅ Serve HTML pages directly for routes like /tutor or /marketplace
 app.get("/marketplace", (req, res) => {

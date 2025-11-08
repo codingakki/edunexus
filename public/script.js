@@ -1,155 +1,133 @@
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("year").textContent = new Date().getFullYear();
+// Global API Base URL
+const API_BASE = "https://edunexus-1-ewni.onrender.com";
 
-  const listings = document.getElementById("listings");
-  const cartBtn = document.createElement("button");
-  cartBtn.classList.add("btn", "checkout-btn");
-  cartBtn.textContent = "🛒 View Cart";
-  document.querySelector("#marketplace").appendChild(cartBtn);
+/**
+ * Attaches click event listeners to all "Add to Cart" buttons.
+ * When clicked, it sends the product and user ID to the backend API.
+ */
+function attachAddToCartHandlers() {
+  // Use a common selector that can find buttons on both pages
+  document.querySelectorAll(".add-to-cart, .btn-add-to-cart").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const productId = btn.dataset.productId;
+      const userId = "demo-user-123"; // TODO: Replace with actual logged-in user ID
 
-  // ======================
-  // FETCH PRODUCTS
-  // ======================
-  async function fetchProducts() {
-    try {
-      const res = await fetch("/api/products");
-      if (!res.ok) throw new Error("Failed to fetch products");
-      const data = await res.json();
-      renderProducts(data);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      listings.innerHTML = `<p style="color:red;">⚠️ Failed to load products</p>`;
-    }
-  }
-
-  // ======================
-  // RENDER PRODUCTS
-  // ======================
-  function renderProducts(data) {
-    listings.innerHTML = data
-      .map(
-        (item) => `
-      <div class="card product-card">
-        <img src="${item.img}" alt="${item.title}" />
-        <h3>${item.title}</h3>
-        <p>${item.subject} • ${item.location}</p>
-        <h4>₹${item.price}</h4>
-        <button class="btn addCartBtn" 
-          data-id="${item._id}" 
-          data-name="${item.title}" 
-          data-price="${item.price}" 
-          data-image="${item.img}">
-          Add to Cart
-        </button>
-      </div>
-    `
-      )
-      .join("");
-
-    document.querySelectorAll(".addCartBtn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const product = {
-          id: btn.dataset.id,
-          name: btn.dataset.name,
-          price: btn.dataset.price,
-          image: btn.dataset.image,
-        };
-        addToCart(product);
-      });
-    });
-  }
-
-  // ======================
-  // CART FUNCTIONALITY
-  // ======================
-  function addToCart(product) {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const exists = cart.find((item) => item.id === product.id);
-    if (!exists) {
-      cart.push(product);
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert(`${product.name} added to cart!`);
-    } else {
-      alert("Item already in cart!");
-    }
-  }
-
-  // ======================
-  // VIEW CART + CHECKOUT
-  // ======================
-  cartBtn.addEventListener("click", () => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    if (cart.length === 0) return alert("Your cart is empty!");
-
-    // Show cart summary
-    let msg = "🛍️ Your Cart:\n\n";
-    let total = 0;
-    cart.forEach((item) => {
-      msg += `${item.name} - ₹${item.price}\n`;
-      total += Number(item.price);
-    });
-    msg += `\nTotal: ₹${total}\n\nProceed to checkout?`;
-
-    if (confirm(msg)) {
-      // Check login
-      const user = localStorage.getItem("user");
-      if (!user) {
-        alert("Please log in to continue checkout.");
-        window.location.href = "login.html";
-      } else {
-        alert("Redirecting to payment gateway...");
-        window.location.href = "payment.html";
+      if (!productId) {
+        console.error("No product ID found on button");
+        return;
       }
-    }
-  });
 
-  // ======================
-  // TUTORING BUTTONS
-  // ======================
-  document.querySelectorAll(".tutor-card .btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const role = btn.textContent.includes("Teach") ? "teach" : "learn";
-      window.location.href = `/tutors.html?mode=${role}`;
+      try {
+        const res = await fetch(`${API_BASE}/api/cart/add`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, productId }),
+        });
+        const data = await res.json();
+
+        // Show a simple confirmation
+        alert(res.ok ? "✅ " + data.message : "⚠️ " + (data.message || "Failed to add to cart"));
+
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+        alert("❌ Could not add product to cart.");
+      }
     });
   });
-
-  // ======================
-  // LOGIN LINK DISPLAY
-  // ======================
- const user = JSON.parse(localStorage.getItem("user"));
-if (user) {
-  const loginLink = document.getElementById("loginLink");
-  loginLink.innerText = `Hi, ${user.name}`;
-  loginLink.href = "#"; // disable link when logged in
 }
-document.addEventListener("DOMContentLoaded", async () => {
-  const productList = document.getElementById("productList");
-  if (!productList) return; // Exit if not on Marketplace page
+
+/**
+ * Loads ALL products for the main Marketplace page (marketplace.html)
+ */
+async function loadProducts() {
+  const container = document.getElementById("productList");
+  if (!container) return; // Exit if the element isn't on this page
 
   try {
-    const res = await fetch("/api/products");
+    const res = await fetch(`${API_BASE}/api/products`);
     const products = await res.json();
 
-    if (!Array.isArray(products) || products.length === 0) {
-      productList.innerHTML = "<p>No products available right now.</p>";
+    if (!products || !products.length) {
+      container.innerHTML = "<p>No products available.</p>";
       return;
     }
 
-    productList.innerHTML = products
-      .map(
-        (p) => `
-        <div class="product-card">
-          <h3>${p.name}</h3>
-          <p>${p.description || "No description available"}</p>
-          <button>Add to Cart</button>
-        </div>
-      `
-      )
-      .join("");
+    container.innerHTML = products.map(p => `
+      <div class="product-card">
+        <img src="${p.img || 'default.jpg'}" alt="${p.title}" class="product-img">
+        <h3>${p.title || "Untitled Product"}</h3>
+        <p><strong>Subject:</strong> ${p.subject || "N/A"}</p>
+        <p><strong>Location:</strong> ${p.location || "N/A"}</p>
+        <p><strong>Price:</strong> ₹${p.price || 0}</p>
+        <button class="add-to-cart" data-product-id="${p._id}">Add to Cart</button>
+      </div>
+    `).join('');
+
+    // After rendering products, attach the click handlers
+    attachAddToCartHandlers();
+
   } catch (err) {
     console.error("Error loading products:", err);
-    productList.innerHTML = "<p>⚠️ Failed to load products.</p>";
+    container.innerHTML = "<p>⚠️ Failed to load products. Please try again later.</p>";
   }
-});
+}
 
+/**
+ * Loads the first 3 products for the Home page preview (index.html)
+ */
+async function loadPreviewProducts() {
+  const container = document.getElementById("productPreview");
+  if (!container) return; // Exit if the element isn't on this page
+
+  try {
+    const res = await fetch(`${API_BASE}/api/products`);
+    const products = await res.json();
+
+    if (!products || !products.length) {
+      container.innerHTML = "<p class='empty-state'>No featured products available yet.</p>";
+      return;
+    }
+
+    // Show only the first 3 products
+    container.innerHTML = products.slice(0, 3).map(p => `
+      <div class="product-card">
+        <img src="${p.img || 'default.jpg'}" alt="${p.title}" class="product-img">
+        <h3>${p.title}</h3>
+        <p class="subject-tag">Subject: ${p.subject || "N/A"}</p>
+        <div class="price-location">
+          <span class="price">₹ ${p.price}</span>
+          <span class="location">${p.location || "N/A"}</span>
+        </div>
+        <button class="btn-add-to-cart" data-product-id="${p._id}">Add to Cart</button>
+      </div>
+    `).join('');
+    
+    // After rendering products, attach the click handlers
+    attachAddToCartHandlers();
+
+  } catch (error) {
+    container.innerHTML = "<p class='empty-state'>Failed to load products. Server might be offline.</p>";
+    console.error(error);
+  }
+}
+
+/**
+ * Main script execution.
+ * Runs when the page is fully loaded.
+ */
+document.addEventListener("DOMContentLoaded", () => {
+  // Set copyright year
+  const yearSpan = document.getElementById("year");
+  if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+  }
+
+  // Check which page we are on and load appropriate content
+  if (document.getElementById("productList")) {
+    loadProducts(); // We are on marketplace.html
+  } 
+  
+  if (document.getElementById("productPreview")) {
+    loadPreviewProducts(); // We are on index.html
+  }
 });
