@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Purchases - Edunexus</title>
+  <link rel="stylesheet" href="style.css" />
+  </head>
+<body>
+  <header>
+    </header>
+
+  <section class="marketplace-section">
+    <h1>My Purchased Notes</h1>
+    <div class="product-grid" id="purchasedList">
+      <p>Loading your purchases...</p>
+    </div>
+  </section>
+
+  <footer>
+    </footer>
+
+  <script>
+    const API_BASE = "https://edunexus-1-ewni.onrender.com";
+
+    // (Yahaan 'checkLoginState' function paste karein)
+
+    async function loadPurchases() {
+      const token = localStorage.getItem("token");
+      const container = document.getElementById("purchasedList");
+      if (!token) {
+        container.innerHTML = "<p>Please login to see your purchases.</p>";
+        return;
+      }
+
+      try {
+        // Hum '/api/auth/me' route use kar rahe hain
+        const res = await fetch(`${API_BASE}/api/auth/me`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        const user = await res.json();
+        
+        // 'user.purchases' ko populate karna hoga
+        // Iske liye humein backend route ko update karna hoga (Kadam 4)
+        
+        if (!user.purchases || user.purchases.length === 0) {
+          container.innerHTML = "<p>You have not purchased any notes yet.</p>";
+          return;
+        }
+
+        container.innerHTML = user.purchases.map(product => `
+          <div class="product-card">
+            <h3>${product.title}</h3>
+            <p class="subject-tag">Subject: ${product.subject}</p>
+            
+            <a href="${API_BASE}/api/products/download/${product._id}" class="btn-primary" style="text-decoration: none;">
+              Download PDF
+            </a>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        container.innerHTML = "<p>Failed to load purchases.</p>";
+      }
+    }
+    
+    document.addEventListener("DOMContentLoaded", loadPurchases);
+  </script>
+</body>
+</html>

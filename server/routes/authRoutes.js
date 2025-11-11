@@ -103,7 +103,14 @@ router.get("/me", async (req, res) => {
     if (!token) return res.status(401).json({ error: "No token provided" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-passwordHash");
+    
+    // === YEH HAI UPDATE ===
+    // 'populate("purchases")' add kiya hai taaki 'My Purchases' page ko products ki details mil sakein
+    const user = await User.findById(decoded.id)
+      .select("-passwordHash")
+      .populate("purchases"); // <-- YEH HAI NAYA CHANGE
+    // ======================
+
     if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json(user);
