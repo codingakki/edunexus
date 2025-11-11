@@ -11,7 +11,7 @@ const router = express.Router();
 // ✅ Generate JWT Token
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role }, // 'id' ka istemal karta hai
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
@@ -32,10 +32,7 @@ router.post("/signup", async (req, res) => {
     if (existingUser)
       return res.status(400).json({ error: "User already exists" });
 
-    // ✅ Hash password before saving
     const passwordHash = await bcrypt.hash(password, 10);
-
-    // ✅ Allow default role as "student" if not provided
     const userRole = role || "student";
 
     const user = await User.create({
@@ -45,12 +42,10 @@ router.post("/signup", async (req, res) => {
       role: userRole,
     });
 
-    const token = jwt.sign(
-  { userId: user._id, role: user.role },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
-
+    // === YEH HAI FIX ===
+    // Alag se token banane ki jagah, 'generateToken' function ka istemal kiya
+    const token = generateToken(user); 
+    // ===================
 
     res.status(201).json({
       message: "Signup successful",
@@ -78,7 +73,6 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "User not found" });
 
-    // ✅ Compare hashed password
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) return res.status(400).json({ error: "Invalid password" });
 
