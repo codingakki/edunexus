@@ -43,7 +43,7 @@ import purchaseRoutes from "./routes/purchaseRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
-import paymentRoutes from "./routes/paymentRoutes.js"; // <-- YEH NAYI LINE HAI
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 // ✅ Use routes
 app.use("/api/products", productRoutes);
@@ -55,7 +55,7 @@ app.use("/api/purchases", purchaseRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/payment", paymentRoutes); // <-- YEH NAYI LINE HAI
+app.use("/api/payment", paymentRoutes);
 
 // ✅ Serve HTML pages directly for routes like /tutor or /marketplace
 app.get("/marketplace", (req, res) => {
@@ -73,6 +73,12 @@ app.get("/tutor/teach", (req, res) => {
 app.get("/tutor/study", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/study.html"));
 });
+
+// === YEH HAI NAYA ROUTE ===
+app.get("/my-purchases", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/my-purchases.html"));
+});
+// ==========================
 
 // ✅ 404 handler
 app.use((req, res, next) => {
