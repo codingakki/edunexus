@@ -12,7 +12,7 @@
     <div class="header-inner">
       <div class="logo">Edunexus</div>
       <nav>
-        <a href="cart.html">Cart</a>
+        <a href="cart.html" id="cartLink">Cart</a> 
         <a href="marketplace.html">Marketplace</a>
         <a href="tutor.html">Connect</a>
         <a href="contact.html">Contact</a>
@@ -33,8 +33,6 @@
   <section id="featured-products">
     <h2>✨ Top Study Resources</h2>
     <div class="products-grid" id="productPreview"></div>
-    <div class="products-grid" id="productPreview">
-      </div>
     <div class="view-all-container">
       <a href="marketplace.html" class="view-all-link">View All Products ➜</a>
     </div>
@@ -45,20 +43,23 @@
   </footer>
 
   <script>
+    // Pehle se maujood code
     document.getElementById('year').textContent = new Date().getFullYear();
 
     async function loadPreviewProducts() {
       const container = document.getElementById('productPreview');
       try {
-        const res = await fetch('http://localhost:5000/api/products');
-        const data = await res.json();
+        const res = await fetch('http://localhost:5000/api/products'); 
+        const data = await res.json(); // 'data' hi array hai
 
-        if (!data.length) {
+        // === YEH HAI FIX ===
+        // 'data.products' ki jagah seedha 'data' (array) ko check karein
+        if (!data || !data.length) { 
           container.innerHTML = "<p class='empty-state'>No featured products available yet.</p>";
           return;
         }
 
-        // Show only first 3 products
+        // 'data.products.slice' ki jagah 'data.slice'
         container.innerHTML = data.slice(0, 3).map(p => `
           <div class="product-card">
             <h3>${p.title}</h3>
@@ -67,16 +68,93 @@
               <span class="price">₹ ${p.price}</span>
               <span class="location">${p.location || "N/A"}</span>
             </div>
-            <button class="btn-add-to-cart">Add to Cart</button>
+            <button class="btn-add-to-cart" data-product-id="${p._id}">Add to Cart</button>
           </div>
         `).join('');
+        // ==================
+
+        // Naye buttons par listener lagaye (Yeh line zaroori hai)
+        addCartButtonListeners();
+
       } catch (error) {
         container.innerHTML = "<p class='empty-state'>Failed to load products. Server is offline.</p>";
         console.error(error);
       }
     }
 
-    loadPreviewProducts();
-  </script>
+    // Cart button listeners
+    function addCartButtonListeners() {
+      document.querySelectorAll(".btn-add-to-cart").forEach(button => {
+        button.addEventListener("click", (e) => {
+          const productId = e.target.dataset.productId;
+          handleAddToCart(productId);
+        });
+      });
+    }
+
+    // "Add to Cart" logic (with token)
+    async function handleAddToCart(productId) {
+      const token = localStorage.getItem("token"); 
+
+      if (!token) {
+        alert("Please login to add items to cart.");
+        window.location.href = "login.html"; 
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:5000/api/cart", { 
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token 
+          },
+          body: JSON.stringify({ productId: productId, quantity: 1 }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert("✅ Product added to cart!");
+        } else {
+          alert("❌ " + (data.error || "Failed to add product"));
+        }
+      } catch (err) {
+        alert("Error connecting to server.");
+      }
+    }
+
+    // Login state check logic
+    function checkLoginState() {
+      const token = localStorage.getItem("token");
+      const loginLink = document.getElementById("loginLink");
+      const cartLink = document.getElementById("cartLink");
+
+      if (token) {
+        // User logged-in hai
+        loginLink.textContent = "Logout"; 
+        loginLink.href = "#"; 
+        loginLink.classList.add("btn-logout"); 
+
+        loginLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          alert("Logged out successfully.");
+          window.location.href = "index.html"; 
+        });
+
+      } else {
+        // User logged-out hai
+        cartLink.style.display = "none"; 
+      }
+    }
+
+    // Saare functions ko page load par run kiya
+    document.addEventListener("DOMContentLoaded", () => {
+      checkLoginState(); 
+      loadPreviewProducts();
+    });
+</script>
 </body>
 </html>
