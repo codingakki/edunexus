@@ -208,27 +208,48 @@
     const API_BASE = "https://edunexus-1-ewni.onrender.com"; // API URL
 
     // --- Login State Logic (Added by me) ---
-    function checkLoginState() {
-      const token = localStorage.getItem("token");
-      const loginLink = document.getElementById("loginLink");
-      const cartLink = document.getElementById("cartLink");
+    // --- Login State Logic (Updated) ---
+function checkLoginState() {
+  const token = localStorage.getItem("token");
+  const loginLink = document.getElementById("loginLink");
+  const cartLink = document.getElementById("cartLink");
 
-      if (token) {
-        loginLink.textContent = "Logout"; 
-        loginLink.href = "#"; 
-        loginLink.classList.add("btn-logout"); 
+  // Agar header mein login link nahi hai (jaise payment page), toh kuch na karein
+  if (!loginLink) {
+    return;
+  }
 
-        loginLink.addEventListener("click", (e) => {
-          e.preventDefault();
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          alert("Logged out successfully.");
-          window.location.href = "index.html"; 
-        });
-      } else {
-        cartLink.style.display = "none"; 
-      }
+  const nav = loginLink.parentElement; // <nav> element
+
+  if (token) {
+    // User Logged-in hai
+    loginLink.textContent = "Logout"; 
+    loginLink.href = "#"; 
+    loginLink.classList.add("btn-logout"); 
+
+    // Check karein ki "My Purchases" link pehle se hai ya nahi (taaki duplicate na bane)
+    if (!document.querySelector('a[href="my-purchases.html"]')) {
+      // "My Purchases" link banayein
+      const purchasesLink = document.createElement('a');
+      purchasesLink.href = 'my-purchases.html';
+      purchasesLink.textContent = 'My Purchases';
+      // Ise 'loginLink' (jo ab 'Logout' hai) se pehle daalein
+      nav.insertBefore(purchasesLink, loginLink); 
     }
+
+    // Logout logic
+    loginLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      alert("Logged out successfully.");
+      window.location.href = "index.html"; 
+    });
+  } else {
+    // User Logged-out hai
+    cartLink.style.display = "none"; 
+  }
+}
     // Run login check on page load
     document.addEventListener("DOMContentLoaded", checkLoginState);
 
