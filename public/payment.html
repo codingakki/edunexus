@@ -10,48 +10,87 @@
   <main class="container">
     <h2>Payment</h2>
     <p id="paymentSummary">Preparing payment...</p>
-    <button id="payBtn" class="btn btn-primary">Pay Now</button>
+    <button id="payBtn" class="btn btn-primary" disabled>Pay Now</button>
   </main>
 
-  <!-- Razorpay checkout script -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
-    async function prepare() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      if (!cart.length) {
-        alert('Cart empty');
-        window.location.href = '/';
+    // --- Global variables taaki server se mila data store kar sakein ---
+    let cartTotal = 0;
+    let cartProductIds = [];
+    const API_BASE = "https://edunexus-1-ewni.onrender.com"; // Aapka Render URL
+    // ---
+
+    // 1. Naya function jo SERVER se cart laayega
+    async function preparePayment() {
+      const token = localStorage.getItem('token');
+      const summaryEl = document.getElementById('paymentSummary');
+      const payBtn = document.getElementById('payBtn');
+
+      if (!token) {
+        alert("Please login to continue.");
+        window.location.href = 'login.html';
         return;
       }
-      const total = cart.reduce((s, i) => s + Number(i.price), 0);
-      document.getElementById('paymentSummary').innerText =
-        `Pay ₹${total} for ${cart.length} item(s).`;
+
+      try {
+        // Token bhej kar server se cart fetch karein
+        const res = await fetch(`${API_BASE}/api/cart`, {
+          method: 'GET',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch cart data.");
+        }
+
+        const cart = await res.json();
+
+        if (!cart.items || cart.items.length === 0) {
+          // Yeh hai asli "Cart empty" check
+          alert('Your cart is empty.'); 
+          window.location.href = 'marketplace.html'; // Wapas shop par bhej dein
+          return;
+        }
+
+        // Server ke data se total calculate karein
+        let total = 0;
+        let productIds = [];
+        cart.items.forEach(item => {
+          if (item.productId) { // Check karein ki product exist karta hai
+            total += (item.productId.price || 0) * (item.quantity || 1);
+            productIds.push(item.productId._id); // Payment ke liye IDs store karein
+          }
+        });
+
+        // Global variables mein data save karein taaki "Pay" button use kar sake
+        cartTotal = total;
+        cartProductIds = productIds;
+
+        // UI Update karein
+        summaryEl.innerText = `Pay ₹${total.toFixed(2)} for ${cart.items.length} item(s).`;
+        payBtn.disabled = false; // Ab "Pay Now" button ko enable karein
+
+      } catch (error) {
+        console.error("Payment prep error:", error);
+        summaryEl.innerText = "Error loading cart. Please go back.";
+      }
     }
 
+    // 2. "Pay Now" button ab global variables use karega
     document.getElementById('payBtn').addEventListener('click', async () => {
       const token = localStorage.getItem('token');
-      if (!token) {
-        localStorage.setItem('returnTo', '/payment.html');
-        window.location.href = '/login.html';
+      
+      // Data localStorage se nahi, global variable se lein
+      const total = cartTotal;
+      const productIds = cartProductIds;
+
+      if (total === 0 || productIds.length === 0) {
+        alert("Cart is empty or total is zero. Cannot proceed.");
         return;
       }
 
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const total = cart.reduce((s, i) => s + Number(i.price), 0);
-
-      // 1) create order on server (mocked for now)
-      const res = await fetch('/api/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ amount: total })
-      });
-      if (!res.ok) {
-        alert('Failed to create order');
-        return;
-      }
-      const order = await res.json();
-
-      // 🔹 Mock payment success (testing without Razorpay)
+      // Aapka Mock payment flow (Yeh ab sahi data use karega)
       alert('Simulating payment success...');
       const fakeResponse = {
         razorpay_payment_id: "pay_test123",
@@ -59,24 +98,28 @@
         razorpay_signature: "sig_test123"
       };
 
-      // Directly call backend purchase recording
-      const productIds = cart.map(i => i.id);
-      const r = await fetch('/api/purchases', {
+      // Server ko 'purchases' route par call karein
+      const r = await fetch(`${API_BASE}/api/purchases`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ productIds, payment: fakeResponse })
+        body: JSON.stringify({ productIds: productIds, payment: fakeResponse })
       });
+
       if (!r.ok) {
         alert('Payment record failed');
         return;
       }
-      localStorage.removeItem('cart');
+
+      // Yahaan humein server par cart clear karne ka API call karna chahiye
+      // Abhi ke liye, hum bas redirect kar rahe hain
+      
       alert('Fake payment successful — materials unlocked');
-      window.location.href = '/';
+      window.location.href = 'index.html'; // Home page par bhej dein
     });
 
-    // ✅ Initialize payment summary on load
-    prepare();
+    // 3. Page load hote hi naya function call karein
+    preparePayment();
+
   </script>
 </body>
 </html>

@@ -92,37 +92,39 @@
       });
     }
 
-    // "Add to Cart" logic (with token)
-    async function handleAddToCart(productId) {
-      const token = localStorage.getItem("token"); 
+   // "Add to Cart" logic (with token)
+async function handleAddToCart(productId) {
+  const token = localStorage.getItem("token"); 
 
-      if (!token) {
-        alert("Please login to add items to cart.");
-        window.location.href = "login.html"; 
-        return;
-      }
+  if (!token) {
+    alert("Please login to add items to cart.");
+    window.location.href = "login.html"; 
+    return;
+  }
 
-      try {
-        const res = await fetch("http://localhost:5000/api/cart", { 
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + token 
-          },
-          body: JSON.stringify({ productId: productId, quantity: 1 }),
-        });
+  try {
+    // YEH HAI SAHI ROUTE: "POST" request seedha "/api/cart" par
+    const res = await fetch("http://localhost:5000/api/cart", { 
+      method: "POST", // Method 'POST' hona zaroori hai
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token 
+      },
+      // Data ko URL mein nahi, BODY mein bhejna hai
+      body: JSON.stringify({ productId: productId, quantity: 1 }), 
+    });
 
-        const data = await res.json();
+    const data = await res.json();
 
-        if (res.ok) {
-          alert("✅ Product added to cart!");
-        } else {
-          alert("❌ " + (data.error || "Failed to add product"));
-        }
-      } catch (err) {
-        alert("Error connecting to server.");
-      }
+    if (res.ok) {
+      alert("✅ Product added to cart!");
+    } else {
+      alert("❌ " + (data.error || "Failed to add product"));
     }
+  } catch (err) {
+    alert("Error connecting to server.");
+  }
+}
 
     // Login state check logic
     function checkLoginState() {
