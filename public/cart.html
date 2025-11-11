@@ -5,48 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Cart - Edunexus</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
   <style>
-    /* Aapke styles bilkul theek hain */
-    .cart-container {
-      width: 90%;
-      max-width: 800px;
-      margin: 2rem auto;
-    }
-    .cart-item {
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid #eee;
-      padding: 1rem 0;
-    }
-    .cart-item-img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      margin-right: 1rem;
-    }
-    .cart-item-details {
-      flex-grow: 1;
-    }
-    .cart-total {
-      text-align: right;
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-top: 1rem;
-    }
-    .checkout-btn {
-      background-color: #6a1b9a;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-      display: block;
-      width: 200px;
-      margin: 1rem 0 0 auto;
-      text-align: center;
-      text-decoration: none;
-    }
+    .cart-container { width: 90%; max-width: 800px; margin: 2rem auto; }
+    .cart-item { display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 1rem 0; }
+    .cart-item-img { width: 80px; height: 80px; object-fit: cover; margin-right: 1rem; }
+    .cart-item-details { flex-grow: 1; }
+    .cart-total { text-align: right; font-size: 1.5rem; font-weight: bold; margin-top: 1rem; }
+    .checkout-btn { background-color: #6a1b9a; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; display: block; width: 200px; margin: 1rem 0 0 auto; text-align: center; text-decoration: none; }
+    .quantity-controls { margin-top: 10px; }
+    .btn-qty { padding: 2px 8px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -55,14 +24,15 @@
     <div class="header-inner">
       <div class="logo"><a href="index.html">Edunexus</a></div>
       <nav>
+        <a href="cart.html" id="cartLink">Cart</a>
         <a href="index.html">Home</a>
         <a href="marketplace.html">Marketplace</a>
+        <a href="tutor.html">Find Tutors</a>
         <a href="contact.html">Contact</a>
-        <a href="register.html">Connect</a>
-        </nav>
+        <a href="login.html" id="loginLink" class="btn-login">Login</a>
+      </nav>
     </div>
   </header>
-
   <main class="cart-container">
     <a href="marketplace.html">← Back to shop</a>
     <h1>Your Cart</h1>
@@ -78,223 +48,165 @@
 
   </main>
 
- <script>
-  const API_BASE = "https://edunexus-1-ewni.onrender.com"; 
+  <footer style="margin-top: 50px;">
+    <small>© <span id="year">2025</span> Edunexus. All rights reserved.</small>
+  </footer>
 
-  // --- Login State Logic (Header ko fix karne ke liye) ---
- // --- Login State Logic (Updated) ---
-function checkLoginState() {
-  const token = localStorage.getItem("token");
-  const loginLink = document.getElementById("loginLink");
-  const cartLink = document.getElementById("cartLink");
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const API_BASE = "https://edunexus-1-ewni.onrender.com"; 
 
-  // Agar header mein login link nahi hai (jaise payment page), toh kuch na karein
-  if (!loginLink) {
-    return;
-  }
+    // --- Login State Logic (Updated) ---
+    function checkLoginState() {
+      const token = localStorage.getItem("token");
+      const loginLink = document.getElementById("loginLink");
+      const cartLink = document.getElementById("cartLink");
 
-  const nav = loginLink.parentElement; // <nav> element
-
-  if (token) {
-    // User Logged-in hai
-    loginLink.textContent = "Logout"; 
-    loginLink.href = "#"; 
-    loginLink.classList.add("btn-logout"); 
-
-    // Check karein ki "My Purchases" link pehle se hai ya nahi (taaki duplicate na bane)
-    if (!document.querySelector('a[href="my-purchases.html"]')) {
-      // "My Purchases" link banayein
-      const purchasesLink = document.createElement('a');
-      purchasesLink.href = 'my-purchases.html';
-      purchasesLink.textContent = 'My Purchases';
-      // Ise 'loginLink' (jo ab 'Logout' hai) se pehle daalein
-      nav.insertBefore(purchasesLink, loginLink); 
-    }
-
-    // Logout logic
-    loginLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      alert("Logged out successfully.");
-      window.location.href = "index.html"; 
-    });
-  } else {
-    // User Logged-out hai
-    cartLink.style.display = "none"; 
-  }
-}
-      // "My Purchases" link banayein
-      const purchasesLink = document.createElement('a');
-      purchasesLink.href = 'my-purchases.html';
-      purchasesLink.textContent = 'My Purchases';
-      nav.insertBefore(purchasesLink, loginLink); 
-
-      // Logout logic
-// --- Login State Logic (Updated) ---
-function checkLoginState() {
-  const token = localStorage.getItem("token");
-  const loginLink = document.getElementById("loginLink");
-  const cartLink = document.getElementById("cartLink");
-
-  // Agar header mein login link nahi hai (jaise payment page), toh kuch na karein
-  if (!loginLink) {
-    return;
-  }
-
-  const nav = loginLink.parentElement; // <nav> element
-
-  if (token) {
-    // User Logged-in hai
-    loginLink.textContent = "Logout"; 
-    loginLink.href = "#"; 
-    loginLink.classList.add("btn-logout"); 
-
-    // Check karein ki "My Purchases" link pehle se hai ya nahi (taaki duplicate na bane)
-    if (!document.querySelector('a[href="my-purchases.html"]')) {
-      // "My Purchases" link banayein
-      const purchasesLink = document.createElement('a');
-      purchasesLink.href = 'my-purchases.html';
-      purchasesLink.textContent = 'My Purchases';
-      // Ise 'loginLink' (jo ab 'Logout' hai) se pehle daalein
-      nav.insertBefore(purchasesLink, loginLink); 
-    }
-
-    // Logout logic
-    loginLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      alert("Logged out successfully.");
-      window.location.href = "index.html"; 
-    });
-  } else {
-    // User Logged-out hai
-    cartLink.style.display = "none"; 
-  }
-}
-  // --- Cart Load Logic ---
-  async function loadCartItems(token) {
-    const container = document.getElementById("cart-items-container");
-    const summary = document.getElementById("cart-summary");
-    const totalEl = document.getElementById("cart-total");
-
-    try {
-      const res = await fetch(`${API_BASE}/api/cart`, {
-        method: "GET",
-        headers: { "Authorization": "Bearer " + token }
-      });
-      
-      if (!res.ok) throw new Error(`Failed to fetch cart. Status: ${res.status}`);
-      
-      const cart = await res.json();
-      
-      if (!cart.items || cart.items.length === 0) {
-        container.innerHTML = "<p>Your cart is empty.</p>";
-        summary.style.display = "none"; // Summary hide karein
-        return;
+      // Ab 'loginLink' mil jaayega aur code crash nahi hoga
+      if (!loginLink) {
+        return; 
       }
 
-      container.innerHTML = ""; // Container clear karein
-      let totalPrice = 0;
+      const nav = loginLink.parentElement; // <nav> element
 
-      cart.items.forEach(item => {
-        const product = item.productId; 
-        if (!product) return; 
+      if (token) {
+        // User Logged-in hai
+        loginLink.textContent = "Logout"; 
+        loginLink.href = "#"; 
+        loginLink.classList.add("btn-logout"); 
 
-        totalPrice += (product.price || 0) * (item.quantity || 1);
+        if (!document.querySelector('a[href="my-purchases.html"]')) {
+          const purchasesLink = document.createElement('a');
+          purchasesLink.href = 'my-purchases.html';
+          purchasesLink.textContent = 'My Purchases';
+          nav.insertBefore(purchasesLink, loginLink); 
+        }
 
-        container.innerHTML += `
-          <div class="cart-item">
-            <img src="${product.img || 'default.jpg'}" alt="${product.title}" class="cart-item-img">
-            <div class="cart-item-details">
-              <h3>${product.title}</h3>
-              <p>Price: ₹${product.price}</p>
-              
-              <div class="quantity-controls">
-                <button class="btn-qty btn-qty-minus" data-product-id="${product._id}">-</button>
-                <span class="quantity-text">${item.quantity}</span>
-                <button class="btn-qty btn-qty-plus" data-product-id="${product._id}">+</button>
-              </div>
-
-            </div>
-          </div>
-        `;
-      });
-
-      totalEl.textContent = `Total: ₹${totalPrice.toFixed(2)}`;
-      summary.style.display = "block";
-
-      addQuantityListeners();
-
-    } catch (error) {
-      console.error("Error loading cart:", error);
-      container.innerHTML = "<p>⚠️ Could not load your cart. Please try again.</p>";
-    }
-  }
-
-  // --- Quantity Button Listeners ---
-  function addQuantityListeners() {
-    // Minus buttons
-    document.querySelectorAll(".btn-qty-minus").forEach(button => {
-      button.addEventListener("click", (e) => {
-        const productId = e.target.dataset.productId;
-        handleUpdateQuantity(productId, "decrease");
-      });
-    });
-
-    // Plus buttons
-    document.querySelectorAll(".btn-qty-plus").forEach(button => {
-      button.addEventListener("click", (e) => {
-        const productId = e.target.dataset.productId;
-        handleUpdateQuantity(productId, "increase");
-      });
-    });
-  }
-
-  // --- Quantity Update Logic ---
-  async function handleUpdateQuantity(productId, action) {
-    const token = localStorage.getItem("token");
-    if (!token) return; 
-
-    try {
-      const res = await fetch(`${API_BASE}/api/cart/update`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token
-        },
-        body: JSON.stringify({ productId: productId, action: action })
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to update quantity");
+        loginLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          alert("Logged out successfully.");
+          window.location.href = "index.html"; 
+        });
+      } else {
+        // User Logged-out hai
+        cartLink.style.display = "none"; 
       }
-
-      // Success hone par, cart ko dobara load karein
-      loadCartItems(token); 
-
-    } catch (error) {
-      console.error("Error updating quantity:", error);
-      alert("Could not update item quantity.");
-    }
-  }
-
-  // --- Page load hote hi sab run karein ---
-  document.addEventListener("DOMContentLoaded", () => {
-    checkLoginState(); // Header ko update karein
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      document.getElementById("cart-items-container").innerHTML = 
-        '<p>Please <a href="login.html">login</a> to see your cart.</p>';
-      return; 
     }
     
-    // Agar logged-in hai, toh cart load karein
-    loadCartItems(token);
-  });
-</script>
+    // --- Cart Load Logic ---
+    async function loadCartItems(token) {
+      const container = document.getElementById("cart-items-container");
+      const summary = document.getElementById("cart-summary");
+      const totalEl = document.getElementById("cart-total");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/cart`, {
+          method: "GET",
+          headers: { "Authorization": "Bearer " + token }
+        });
+        
+        if (!res.ok) throw new Error(`Failed to fetch cart. Status: ${res.status}`);
+        
+        const cart = await res.json();
+        
+        if (!cart.items || cart.items.length === 0) {
+          container.innerHTML = "<p>Your cart is empty.</p>";
+          summary.style.display = "none";
+          return;
+        }
+
+        container.innerHTML = "";
+        let totalPrice = 0;
+
+        cart.items.forEach(item => {
+          const product = item.productId; 
+          if (!product) return; 
+
+          totalPrice += (product.price || 0) * (item.quantity || 1);
+
+          container.innerHTML += `
+            <div class="cart-item">
+              <img src="${product.img || 'default.jpg'}" alt="${product.title}" class="cart-item-img">
+              <div class="cart-item-details">
+                <h3>${product.title}</h3>
+                <p>Price: ₹${product.price}</p>
+                
+                <div class="quantity-controls">
+                  <button class="btn-qty btn-qty-minus" data-product-id="${product._id}">-</button>
+                  <span class="quantity-text">${item.quantity}</span>
+                  <button class="btn-qty btn-qty-plus" data-product-id="${product._id}">+</button>
+                </div>
+
+              </div>
+            </div>
+          `;
+        });
+
+        totalEl.textContent = `Total: ₹${totalPrice.toFixed(2)}`;
+        summary.style.display = "block";
+
+        addQuantityListeners();
+
+      } catch (error) {
+        console.error("Error loading cart:", error);
+        container.innerHTML = "<p>⚠️ Could not load your cart. Please try again.</p>";
+      }
+    }
+
+    // --- Quantity Button Listeners ---
+    function addQuantityListeners() {
+      document.querySelectorAll(".btn-qty-minus").forEach(button => {
+        button.addEventListener("click", (e) => {
+          handleUpdateQuantity(e.target.dataset.productId, "decrease");
+        });
+      });
+      document.querySelectorAll(".btn-qty-plus").forEach(button => {
+        button.addEventListener("click", (e) => {
+          handleUpdateQuantity(e.target.dataset.productId, "increase");
+        });
+      });
+    }
+
+    // --- Quantity Update Logic ---
+    async function handleUpdateQuantity(productId, action) {
+      const token = localStorage.getItem("token");
+      if (!token) return; 
+
+      try {
+        const res = await fetch(`${API_BASE}/api/cart/update`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify({ productId: productId, action: action })
+        });
+        if (!res.ok) throw new Error("Failed to update quantity");
+        
+        loadCartItems(token); // Cart ko dobara load karein
+
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+        alert("Could not update item quantity.");
+      }
+    }
+
+    // --- Page load hote hi sab run karein ---
+    document.addEventListener("DOMContentLoaded", () => {
+      checkLoginState(); // Header ko update karein
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        document.getElementById("cart-items-container").innerHTML = 
+          '<p>Please <a href="login.html">login</a> to see your cart.</p>';
+        return; 
+      }
+      
+      loadCartItems(token); // Cart load karein
+    });
+  </script>
 
 </body>
 </html>
