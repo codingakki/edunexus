@@ -56,13 +56,13 @@ app.use("/api/users", userRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/auth", authRoutes);
-ab ye sabhi pages ke script ko update karo for my purchases
+//ab ye sabhi pages ke script ko update karo for my purchases
 app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 
 // ===============================================
 // ✅ YEH BHI FIX KIYA GAYA HAI
-// ===============================================
+// ===============================================git
 // Sabhi file paths mein "../" wapas add kar diya hai
 app.get("/marketplace", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/marketplace.html"));
