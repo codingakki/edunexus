@@ -46,94 +46,16 @@
     // Pehle se maujood code
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    async function loadPreviewProducts() {
-      const container = document.getElementById('productPreview');
-      try {
-        const res = await fetch('http://localhost:5000/api/products'); 
-        const data = await res.json(); // 'data' hi array hai
+    // Aapka API Base URL
+    const API_BASE = "https://edunexus-1-ewni.onrender.com";
 
-        // === YEH HAI FIX ===
-        // 'data.products' ki jagah seedha 'data' (array) ko check karein
-        if (!data || !data.length) { 
-          container.innerHTML = "<p class='empty-state'>No featured products available yet.</p>";
-          return;
-        }
-
-        // 'data.products.slice' ki jagah 'data.slice'
-        container.innerHTML = data.slice(0, 3).map(p => `
-          <div class="product-card">
-            <h3>${p.title}</h3>
-            <p class="subject-tag">Subject: ${p.subject || "N/A"}</p>
-            <div class="price-location">
-              <span class="price">₹ ${p.price}</span>
-              <span class="location">${p.location || "N/A"}</span>
-            </div>
-            <button class="btn-add-to-cart" data-product-id="${p._id}">Add to Cart</button>
-          </div>
-        `).join('');
-        // ==================
-
-        // Naye buttons par listener lagaye (Yeh line zaroori hai)
-        addCartButtonListeners();
-
-      } catch (error) {
-        container.innerHTML = "<p class='empty-state'>Failed to load products. Server is offline.</p>";
-        console.error(error);
-      }
-    }
-
-    // Cart button listeners
-    function addCartButtonListeners() {
-      document.querySelectorAll(".btn-add-to-cart").forEach(button => {
-        button.addEventListener("click", (e) => {
-          const productId = e.target.dataset.productId;
-          handleAddToCart(productId);
-        });
-      });
-    }
-
-   // "Add to Cart" logic (with token)
-async function handleAddToCart(productId) {
-  const token = localStorage.getItem("token"); 
-
-  if (!token) {
-    alert("Please login to add items to cart.");
-    window.location.href = "login.html"; 
-    return;
-  }
-
-  try {
-    // YEH HAI SAHI ROUTE: "POST" request seedha "/api/cart" par
-    const res = await fetch("http://localhost:5000/api/cart", { 
-      method: "POST", // Method 'POST' hona zaroori hai
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token 
-      },
-      // Data ko URL mein nahi, BODY mein bhejna hai
-      body: JSON.stringify({ productId: productId, quantity: 1 }), 
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert("✅ Product added to cart!");
-    } else {
-      alert("❌ " + (data.error || "Failed to add product"));
-    }
-  } catch (err) {
-    alert("Error connecting to server.");
-  }
-}
-
-    // Login state check logic
+    // --- Login State Logic (Header ko fix karne ke liye) ---
     function checkLoginState() {
       const token = localStorage.getItem("token");
       const loginLink = document.getElementById("loginLink");
       const cartLink = document.getElementById("cartLink");
 
       if (token) {
-        // User logged-in hai
         loginLink.textContent = "Logout"; 
         loginLink.href = "#"; 
         loginLink.classList.add("btn-logout"); 
@@ -145,17 +67,95 @@ async function handleAddToCart(productId) {
           alert("Logged out successfully.");
           window.location.href = "index.html"; 
         });
-
       } else {
-        // User logged-out hai
         cartLink.style.display = "none"; 
       }
     }
 
-    // Saare functions ko page load par run kiya
+    // --- Add to Cart Logic (Yeh hai aapka main fix) ---
+    async function handleAddToCart(productId) {
+      // Check karein ki productId undefined toh nahi hai
+      console.log("Adding to cart, Product ID:", productId);
+        
+      const token = localStorage.getItem("token"); 
+      if (!token) {
+        alert("Please login to add items to cart.");
+        window.location.href = "login.html"; 
+        return;
+      }
+
+      try {
+        // SAHI API CALL: Method POST hai aur data body mein hai
+        const res = await fetch(`${API_BASE}/api/cart`, { 
+          method: "POST", // METHOD 'POST' HONA CHAHIYE
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token 
+          },
+          // DATA BODY MEIN HONA CHAHIYE
+          body: JSON.stringify({ productId: productId, quantity: 1 }),
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert("✅ Product added to cart!");
+        } else {
+          // Server se mila error dikhayein (jaise "Product not found")
+          alert("❌ " + (data.error || "Failed to add product"));
+        }
+      } catch (err) {
+        alert("Error connecting to server.");
+      }
+    }
+
+    // --- Button Listener Logic ---
+    function addCartButtonListeners() {
+      document.querySelectorAll(".btn-add-to-cart").forEach(button => {
+        button.addEventListener("click", (e) => {
+          const productId = e.target.dataset.productId;
+          handleAddToCart(productId); // 'handleAddToCart' ko call karein
+        });
+      });
+    }
+
+    // --- Featured Products Load Logic ---
+    async function loadPreviewProducts() {
+      const container = document.getElementById('productPreview');
+      try {
+        const res = await fetch(`${API_BASE}/api/products`); 
+        const data = await res.json(); // 'data' hi array hai
+
+        if (!data || !data.length) { 
+          container.innerHTML = "<p class='empty-state'>No featured products available yet.</p>";
+          return;
+        }
+
+        // Sirf pehle 3 products dikhayein
+        container.innerHTML = data.slice(0, 3).map(p => `
+          <div class="product-card">
+            <h3>${p.title}</h3>
+            <p class="subject-tag">Subject: ${p.subject || "N/A"}</p>
+            <div class="price-location">
+              <span class="price">₹ ${p.price}</span>
+              <span class="location">${p.location || "N/A"}</span>
+            </div>
+            <button class="btn-add-to-cart" data-product-id="${p._id}">Add to Cart</button>
+          </div>
+        `).join('');
+
+        // Products load hone ke baad naye buttons par listener lagayein
+        addCartButtonListeners();
+
+      } catch (error) {
+        container.innerHTML = "<p class='empty-state'>Failed to load products. Server is offline.</p>";
+        console.error(error);
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
-      checkLoginState(); 
-      loadPreviewProducts();
+      checkLoginState();      // 1. Login status check karein
+      loadPreviewProducts();  // 2. Products load karein
     });
 </script>
 </body>
