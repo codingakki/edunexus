@@ -70,6 +70,7 @@ app.get("/tutor", (req, res) => {
 app.get("/my-purchases", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/my-purchases.html"));
 });
+// Force update
 
 // Faltu routes /tutor/teach aur /tutor/study HATA DIYE GAYE HAIN
 
