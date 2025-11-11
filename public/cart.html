@@ -77,24 +77,19 @@
 
   </main>
 
-  <script>
-    // API_BASE ko relative rakhein ya poora URL dein
+ <script>
     const API_BASE = "https://edunexus-1-ewni.onrender.com"; 
-    // const API_BASE = ""; // Relative path use karna behtar hai
 
     document.addEventListener("DOMContentLoaded", () => {
-      // 1. Token aur User ko localStorage se get karein
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
 
-      // 2. Check karein ki user logged-in hai ya nahi
       if (!token || !user) {
         document.getElementById("cart-items-container").innerHTML = 
           '<p>Please <a href="login.html">login</a> to see your cart.</p>';
-        return; // Function se exit kar jaayein
+        return; 
       }
-
-      // 3. Agar logged-in hai, toh token ke saath cart load karein
+      
       loadCartItems(token);
     });
 
@@ -104,59 +99,109 @@
       const totalEl = document.getElementById("cart-total");
 
       try {
-        // 4. URL se hardcoded user ID hatayein
-        // Server token se user ko pehchaan lega
         const res = await fetch(`${API_BASE}/api/cart`, {
-          method: "GET", // Method GET hai
-          headers: {
-            // 5. Token ko header mein bhejein
-            "Authorization": "Bearer " + token
-          }
+          method: "GET",
+          headers: { "Authorization": "Bearer " + token }
         });
         
-        if (!res.ok) {
-          throw new Error(`Failed to fetch cart. Status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Failed to fetch cart. Status: ${res.status}`);
         
         const cart = await res.json();
         
         if (!cart.items || cart.items.length === 0) {
           container.innerHTML = "<p>Your cart is empty.</p>";
+          summary.style.display = "none"; // Summary bhi hide karein
           return;
         }
 
-        // Clear loading message
-        container.innerHTML = "";
+        container.innerHTML = ""; // Container clear karein
         let totalPrice = 0;
 
-        // Aapka baaki ka logic bilkul sahi hai
         cart.items.forEach(item => {
           const product = item.productId; 
           if (!product) return; 
 
           totalPrice += (product.price || 0) * (item.quantity || 1);
 
+          // === YEH HAI NAYA HTML (Buttons ke saath) ===
           container.innerHTML += `
             <div class="cart-item">
               <img src="${product.img || 'default.jpg'}" alt="${product.title}" class="cart-item-img">
               <div class="cart-item-details">
                 <h3>${product.title}</h3>
                 <p>Price: ₹${product.price}</p>
-                <p>Quantity: ${item.quantity}</p>
+                
+                <div classclass="quantity-controls">
+                  <button class="btn-qty btn-qty-minus" data-product-id="${product._id}">-</button>
+                  <span class="quantity-text">${item.quantity}</span>
+                  <button class="btn-qty btn-qty-plus" data-product-id="${product._id}">+</button>
+                </div>
+
               </div>
             </div>
           `;
+          // ============================================
         });
 
-        // Show summary and total
         totalEl.textContent = `Total: ₹${totalPrice.toFixed(2)}`;
         summary.style.display = "block";
+
+        // Naye buttons par listener lagayein
+        addQuantityListeners();
 
       } catch (error) {
         console.error("Error loading cart:", error);
         container.innerHTML = "<p>⚠️ Could not load your cart. Please try again.</p>";
       }
     }
+
+    // === NAYA FUNCTION: Quantity buttons par listener add karne ke liye ===
+    function addQuantityListeners() {
+      // Minus buttons
+      document.querySelectorAll(".btn-qty-minus").forEach(button => {
+        button.addEventListener("click", (e) => {
+          const productId = e.target.dataset.productId;
+          handleUpdateQuantity(productId, "decrease"); // 'decrease' action
+        });
+      });
+
+      // Plus buttons
+      document.querySelectorAll(".btn-qty-plus").forEach(button => {
+        button.addEventListener("click", (e) => {
+          const productId = e.target.dataset.productId;
+          handleUpdateQuantity(productId, "increase"); // 'increase' action
+        });
+      });
+    }
+
+    // === NAYA FUNCTION: Backend ko quantity update ke liye call karne ke liye ===
+    async function handleUpdateQuantity(productId, action) {
+      const token = localStorage.getItem("token");
+      if (!token) return; // Agar token nahi toh kuch na karein
+
+      try {
+        const res = await fetch(`${API_BASE}/api/cart/update`, { // Naya route
+          method: "PUT", // PUT method update ke liye
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify({ productId: productId, action: action }) // Action bhej rahe hain
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to update quantity");
+        }
+
+        // Success hone par, cart ko dobara load karein (bina page refresh)
+        loadCartItems(token); 
+
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+        alert("Could not update item quantity.");
+      }
+    }
+
   </script>
 
 </body>
