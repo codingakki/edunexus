@@ -6,7 +6,7 @@
   <title>Your Cart - Edunexus</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* You can move these styles to style.css */
+    /* Aapke styles bilkul theek hain */
     .cart-container {
       width: 90%;
       max-width: 800px;
@@ -58,7 +58,7 @@
         <a href="index.html">Home</a>
         <a href="marketplace.html">Marketplace</a>
         <a href="contact.html">Contact</a>
-      </nav>
+        </nav>
     </div>
   </header>
 
@@ -78,22 +78,45 @@
   </main>
 
   <script>
-    // Define your API base URL and the (currently hardcoded) User ID
-    const API_BASE = "https://edunexus-1-ewni.onrender.com";
-    const USER_ID = "673a45d9f82e7123fefb77b9"; // Use the same valid ObjectId
+    // API_BASE ko relative rakhein ya poora URL dein
+    const API_BASE = "https://edunexus-1-ewni.onrender.com"; 
+    // const API_BASE = ""; // Relative path use karna behtar hai
 
     document.addEventListener("DOMContentLoaded", () => {
-      loadCartItems();
+      // 1. Token aur User ko localStorage se get karein
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      // 2. Check karein ki user logged-in hai ya nahi
+      if (!token || !user) {
+        document.getElementById("cart-items-container").innerHTML = 
+          '<p>Please <a href="login.html">login</a> to see your cart.</p>';
+        return; // Function se exit kar jaayein
+      }
+
+      // 3. Agar logged-in hai, toh token ke saath cart load karein
+      loadCartItems(token);
     });
 
-    async function loadCartItems() {
+    async function loadCartItems(token) {
       const container = document.getElementById("cart-items-container");
       const summary = document.getElementById("cart-summary");
       const totalEl = document.getElementById("cart-total");
 
       try {
-        const res = await fetch(`${API_BASE}/api/cart/${USER_ID}`);
-        if (!res.ok) throw new Error("Failed to fetch cart");
+        // 4. URL se hardcoded user ID hatayein
+        // Server token se user ko pehchaan lega
+        const res = await fetch(`${API_BASE}/api/cart`, {
+          method: "GET", // Method GET hai
+          headers: {
+            // 5. Token ko header mein bhejein
+            "Authorization": "Bearer " + token
+          }
+        });
+        
+        if (!res.ok) {
+          throw new Error(`Failed to fetch cart. Status: ${res.status}`);
+        }
         
         const cart = await res.json();
         
@@ -106,10 +129,10 @@
         container.innerHTML = "";
         let totalPrice = 0;
 
-        // Loop through items and render them
+        // Aapka baaki ka logic bilkul sahi hai
         cart.items.forEach(item => {
-          const product = item.productId; // This is the populated product object
-          if (!product) return; // Skip if product was deleted
+          const product = item.productId; 
+          if (!product) return; 
 
           totalPrice += (product.price || 0) * (item.quantity || 1);
 

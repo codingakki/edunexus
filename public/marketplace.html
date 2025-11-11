@@ -9,26 +9,135 @@
 <body>
   <header>
     <div class="header-inner">
-      <div class="logo"><a href="index.html"></a>Edunexus</div>
+      <div class="logo"><a href="index.html">Edunexus</a></div>
       <nav>
-        <a href="cart.html">Cart</a>
+        <a href="cart.html" id="cartLink">Cart</a>
         <a href="index.html">Home</a>
         <a href="tutor.html">Connect</a>
         <a href="contact.html">Contact</a>
+        <a href="login.html" id="loginLink" class="btn-login">Login</a>
       </nav>
     </div>
   </header>
 
   <section class="marketplace-section">
     <h1>Marketplace</h1>
-    <div class="product-grid" id="productList"></div>
+    <div class="product-grid" id="productList">
+      <p>Loading products...</p> </div>
   </section>
 
   <footer>
     <small>© <span id="year">2025</span> Edunexus. All rights reserved.</small>
   </footer>
 
-  <script src="script.js"></script>
-  
+  <script>
+    // Pehle se maujood code
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // API Base URL (Aap ise badal sakte hain agar zaroorat ho)
+    const API_BASE = "https://edunexus-1-ewni.onrender.com";
+    // const API_BASE = ""; // Relative path ke liye
+
+    // --- Login State Logic (index.html se copy kiya) ---
+    function checkLoginState() {
+      const token = localStorage.getItem("token");
+      const loginLink = document.getElementById("loginLink");
+      const cartLink = document.getElementById("cartLink");
+
+      if (token) {
+        loginLink.textContent = "Logout"; 
+        loginLink.href = "#"; 
+        loginLink.classList.add("btn-logout"); 
+
+        loginLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          alert("Logged out successfully.");
+          window.location.href = "index.html"; 
+        });
+      } else {
+        cartLink.style.display = "none"; 
+      }
+    }
+
+    // --- Add to Cart Logic (index.html se copy kiya) ---
+    async function handleAddToCart(productId) {
+      const token = localStorage.getItem("token"); 
+      if (!token) {
+        alert("Please login to add items to cart.");
+        window.location.href = "login.html"; 
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/cart`, { 
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token 
+          },
+          body: JSON.stringify({ productId: productId, quantity: 1 }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("✅ Product added to cart!");
+        } else {
+          alert("❌ " + (data.error || "Failed to add product"));
+        }
+      } catch (err) {
+        alert("Error connecting to server.");
+      }
+    }
+
+    // --- Button Listener Logic (index.html se copy kiya) ---
+    function addCartButtonListeners() {
+      document.querySelectorAll(".btn-add-to-cart").forEach(button => {
+        button.addEventListener("click", (e) => {
+          const productId = e.target.dataset.productId;
+          handleAddToCart(productId);
+        });
+      });
+    }
+
+    // --- Naya function: Saare products load karne ke liye ---
+    async function loadAllProducts() {
+      const container = document.getElementById('productList');
+      try {
+        const res = await fetch(`${API_BASE}/api/products`); 
+        const data = await res.json(); // 'data' hi array hai
+
+        if (!data || !data.length) { 
+          container.innerHTML = "<p class='empty-state'>No products found.</p>";
+          return;
+        }
+
+        // POORE 'data' array par loop, .slice() nahi
+        container.innerHTML = data.map(p => `
+          <div class="product-card">
+            <h3>${p.title}</h3>
+            <p class="subject-tag">Subject: ${p.subject || "N/A"}</p>
+            <div class="price-location">
+              <span class="price">₹ ${p.price}</span>
+              <span class="location">${p.location || "N/A"}</span>
+            </div>
+            <button class="btn-add-to-cart" data-product-id="${p._id}">Add to Cart</button>
+          </div>
+        `).join('');
+
+        // Products load hone ke baad listeners attach karein
+        addCartButtonListeners();
+
+      } catch (error) {
+        container.innerHTML = "<p class='empty-state'>Failed to load products. Server might be offline.</p>";
+        console.error(error);
+      }
+    }
+
+    // --- Page load hote hi sab run karein ---
+    document.addEventListener("DOMContentLoaded", () => {
+      checkLoginState();    // 1. Login status check karein
+      loadAllProducts();  // 2. Saare products load karein
+    });
+  </script>
 </body>
 </html>
