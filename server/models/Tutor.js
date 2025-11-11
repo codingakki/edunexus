@@ -1,9 +1,27 @@
 import mongoose from "mongoose";
 
 const tutorSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  role: String // "student" or "teacher"
+  name: {
+    type: String,
+    required: true,
+  },
+  subject: {
+    type: String,
+    required: true,
+  },
+  experience: {
+    type: String,
+    default: "Not specified",
+  },
+  bio: {
+    type: String,
+    default: "No bio available.",
+  },
+  rate: {
+    type: Number,
+    required: true,
+  },
 });
 
-export default mongoose.model("Tutor", tutorSchema);
+const Tutor = mongoose.model("Tutor", tutorSchema);
+export default Tutor;

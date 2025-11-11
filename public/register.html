@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Student or Tutor | Edunexus</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f7f8fb;
+      margin: 0;
+      text-align: center;
+    }
+
+    h1 {
+      background: linear-gradient(90deg, #4f46e5, #6366f1);
+      color: white;
+      padding: 20px;
+      margin-top: 60px; /* Added margin for header */
+      font-size: 28px;
+    }
+
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      padding: 30px;
+      width: 260px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+    
+    /* Overwrite .btn if it conflicts with style.css */
+    .btn {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #4338ca;
+    }
+
+    /* ===== MODALS ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 380px;
+      text-align: left;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+      from {transform: scale(0.8); opacity: 0;}
+      to {transform: scale(1); opacity: 1;}
+    }
+
+    .modal-content input {
+      width: 90%; /* Adjusted for padding */
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .close {
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+      color: #555;
+    }
+
+    /* ===== SUCCESS POPUP ===== */
+    .success-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      z-index: 200;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translate(-50%, -60%);}
+      to {opacity: 1; transform: translate(-50%, -50%);}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo"><a href="index.html">Edunexus</a></div>
+      <nav>
+        <a href="cart.html" id="cartLink">Cart</a>
+        <a href="index.html">Home</a>
+        <a href="marketplace.html">Marketplace</a>
+        <a href="tutor.html">Find Tutors</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html" id="loginLink" class="btn-login">Login</a>
+      </nav>
+    </div>
+  </header>
+  <h1>🎓 Register as a Student or Tutor</h1>
+
+  <div class="cards">
+    <div class="card">
+      <img src="images/student.jpg" alt="Want to study">
+      <h2>Want to Study</h2>
+      <p>Browse qualified tutors based on your subject and location.</p>
+      <button class="btn" onclick="openModal('study')">Register</button>
+    </div>
+
+    <div class="card">
+      <img src="images/teacher.jpg" alt="Want to Teach">
+      <h2>Want to Teach</h2>
+      <p>Register as a tutor and connect with students who need your expertise.</p>
+      <button class="btn" onclick="openModal('teach')">Register</button>
+    </div>
+  </div>
+
+  <div id="studyModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('study')">&times;</span>
+      <h3>Student Registration</h3>
+      <form id="studyForm">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="subject" placeholder="Subject" required>
+        <input type="text" name="location" placeholder="Location" required>
+        <button class="btn" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="teachModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('teach')">&times;</span>
+      <h3>Tutor Registration</h3>
+      <form id="teachForm">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="subject" placeholder="Subject Expertise (e.g., Maths)" required>
+        <input type="number" name="rate" placeholder="Rate (e.g., 500)" required>
+        <input type="text" name="experience" placeholder="Experience (e.g., 5 years)" required>
+        <button class="btn" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="successPopup" class="success-popup">
+    <h3>🎉 Successfully Registered!</h3>
+    <p>Your details have been submitted.</p>
+    <button onclick="closeSuccess()">OK</button>
+  </div>
+
+  <footer style="margin-top: 100px; padding: 20px; background: #333; color: white;">
+    © <span id="year">2025</span> Edunexus
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const API_BASE = "https://edunexus-1-ewni.onrender.com"; // API URL
+
+    // --- Login State Logic (Added by me) ---
+    function checkLoginState() {
+      const token = localStorage.getItem("token");
+      const loginLink = document.getElementById("loginLink");
+      const cartLink = document.getElementById("cartLink");
+
+      if (token) {
+        loginLink.textContent = "Logout"; 
+        loginLink.href = "#"; 
+        loginLink.classList.add("btn-logout"); 
+
+        loginLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          alert("Logged out successfully.");
+          window.location.href = "index.html"; 
+        });
+      } else {
+        cartLink.style.display = "none"; 
+      }
+    }
+    // Run login check on page load
+    document.addEventListener("DOMContentLoaded", checkLoginState);
+
+    // ==== OPEN / CLOSE MODALS ====
+    function openModal(type) {
+      document.getElementById(type + 'Modal').style.display = 'flex';
+    }
+
+    function closeModal(type) {
+      document.getElementById(type + 'Modal').style.display = 'none';
+    }
+
+    // ==== SUCCESS POPUP ====
+    function showSuccess() {
+      const popup = document.getElementById("successPopup");
+      popup.style.display = "block";
+      setTimeout(() => popup.style.display = "none", 3000);
+    }
+
+    function closeSuccess() {
+      document.getElementById("successPopup").style.display = "none";
+    }
+
+    // ==== FORM SUBMISSION ====
+    async function handleSubmit(formId, endpoint) {
+      const form = document.getElementById(formId);
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+          });
+
+          if (res.ok) {
+            form.reset();
+            closeModal(formId.includes("study") ? "study" : "teach");
+            showSuccess();
+          } else {
+            const errData = await res.json();
+            alert("❌ " + (errData.message || "Something went wrong. Try again!"));
+          }
+        } catch (error) {
+          alert("❌ Server connection error. Try again!");
+        }
+      });
+    }
+
+    // API endpoints ko API_BASE ke saath call karein
+    handleSubmit("studyForm", `${API_BASE}/api/students`);
+    handleSubmit("teachForm", `${API_BASE}/api/tutors`);
+  </script>
+</body>
+</html>
