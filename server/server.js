@@ -36,24 +36,26 @@ mongoose
 // ✅ Import routes
 import productRoutes from "./routes/productRoutes.js";
 import tutorRoutes from "./routes/tutorRoutes.js";
-import studentRoutes from "./routes/studentRoutes.js"; // 👈 Added as requested
+import studentRoutes from "./routes/studentRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import purchaseRoutes from "./routes/purchaseRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js"; // <-- YEH NAYI LINE HAI
 
 // ✅ Use routes
 app.use("/api/products", productRoutes);
 app.use("/api/tutors", tutorRoutes);
-app.use("/api/students", studentRoutes); // 👈 Added as requested
+app.use("/api/students", studentRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/payment", paymentRoutes); // <-- YEH NAYI LINE HAI
 
 // ✅ Serve HTML pages directly for routes like /tutor or /marketplace
 app.get("/marketplace", (req, res) => {
