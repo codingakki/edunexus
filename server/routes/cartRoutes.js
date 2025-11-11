@@ -1,57 +1,67 @@
 import express from "express";
 import Cart from "../models/Cart.js";
+// 1. Auth middleware ko import karein
+import { authMiddleware } from "../middleware/auth.js"; 
 
 const router = express.Router();
 
-// 🛒 Add to Cart (You already have this)
-router.post("/add", async (req, res) => {
+// 🛒 Add to Cart (POST /api/cart)
+// 2. Route ko "/add" se badal kar "/" kiya
+// 3. authMiddleware add kiya
+router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { userId, productId } = req.body;
+    // 4. userId ko req.body se nahi, token se (req.user) se liya
+    const userId = req.user.id;
+    const { productId, quantity = 1 } = req.body; // Default quantity 1
 
-    if (!userId || !productId) {
-      return res.status(400).json({ message: "Missing userId or productId" });
+    if (!productId) {
+      return res.status(400).json({ message: "Missing productId" });
     }
 
-    let cart = await Cart.findOne({ userId });
+    // 5. 'userId' ki jagah 'user' use kiya (Mongoose convention)
+    let cart = await Cart.findOne({ user: userId });
 
     if (!cart) {
-      cart = new Cart({ userId, items: [{ productId, quantity: 1 }] });
+      // Naya cart banaya
+      cart = new Cart({ user: userId, items: [{ productId, quantity }] });
     } else {
+      // Purana cart update kiya
       const existingItem = cart.items.find(
         (item) => item.productId.toString() === productId
       );
 
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += quantity;
       } else {
-        cart.items.push({ productId, quantity: 1 });
+        cart.items.push({ productId, quantity });
       }
     }
 
     await cart.save();
-    res.json({ message: "Product added to cart successfully!" });
+    // Pura cart wapas bhejein taaki UI update ho sake (optional)
+    res.status(200).json(cart);
   } catch (error) {
     console.error("Error adding to cart:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
-// ===============================================
-// ✅ ADD THIS NEW ROUTE
-// ===============================================
-// 🛍️ Get User's Cart
-router.get("/:userId", async (req, res) => {
+// 🛍️ Get User's Cart (GET /api/cart)
+// 6. Route ko "/:userId" se badal kar "/" kiya
+// 7. authMiddleware add kiya
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.params;
+    // 8. userId ko req.params se nahi, token se (req.user) se liya
+    const userId = req.user.id;
     
-    // Find the cart and 'populate' the product details
-    const cart = await Cart.findOne({ userId }).populate({
+    // 9. 'userId' ki jagah 'user' use kiya
+    const cart = await Cart.findOne({ user: userId }).populate({
       path: "items.productId",
-      model: "Product", // Tell Mongoose which model to use
+      model: "Product", // Model ka naam batana zaroori hai
     });
 
     if (!cart) {
-      // Send an empty cart structure if no cart is found
+      // Khaali cart bhejein
       return res.json({ items: [] });
     }
 
@@ -61,6 +71,5 @@ router.get("/:userId", async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
-
 
 export default router;
