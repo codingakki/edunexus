@@ -7,61 +7,78 @@ import { fileURLToPath } from "url";
 
 dotenv.config();
 
+// ✅ Setup dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ===============================================
-// ✅ YEH HAI FIX
+// ✅ YEH HAI FIX: Path ko wapas "../public" kar diya hai
 // ===============================================
-// Path ko "server/public" par point karein
-app.use(express.static(path.join(__dirname, "public")));
-// ===============================================
+app.use(express.static(path.join(__dirname, "../public")));
 
-// (Uploads folder ka path bhi check kar lein, shayad yeh bhi "server/uploads" hai)
+// ✅ Serve uploaded files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ... (MongoDB Connection) ...
+// ✅ MongoDB Connection
 mongoose
-  .connect(process.env.MONGO_URI, { /* ... */ })
-  .then(() => console.log("✅ MongoDB connected"))
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => console.error("❌ MongoDB connection failed:", err));
 
-// ... (Saare route imports) ...
+// ✅ Import routes
 import productRoutes from "./routes/productRoutes.js";
 import tutorRoutes from "./routes/tutorRoutes.js";
-// ... (baaki saare routes)
+import studentRoutes from "./routes/studentRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import purchaseRoutes from "./routes/purchaseRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 
-// ... (Saare app.use("/api/...") routes) ...
+// ✅ Use routes
 app.use("/api/products", productRoutes);
 app.use("/api/tutors", tutorRoutes);
-// ... (baaki saare routes)
+app.use("/api/students", studentRoutes);
+app.use("/api/contacts", contactRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/purchases", purchaseRoutes);
+app.use("/api/uploads", uploadRoutes);
+app.use("/api/auth", authRoutes);
+ab ye sabhi pages ke script ko update karo for my purchases
+app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
-
 
 // ===============================================
 // ✅ YEH BHI FIX KIYA GAYA HAI
 // ===============================================
-// Sabhi file paths se "../" hata diya gaya hai
+// Sabhi file paths mein "../" wapas add kar diya hai
 app.get("/marketplace", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/marketplace.html"));
+  res.sendFile(path.join(__dirname, "../public/marketplace.html"));
 });
 
 app.get("/tutor", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/tutor.html"));
+  res.sendFile(path.join(__dirname, "../public/tutor.html"));
 });
 
+// Woh extra routes (teach/study) yahaan nahi hain, jo sahi hai
+
+// Naya route jo humne add kiya tha
 app.get("/my-purchases", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/my-purchases.html"));
+  res.sendFile(path.join(__dirname, "../public/my-purchases.html"));
 });
 // ===============================================
-
 
 // ✅ 404 handler
 app.use((req, res, next) => {
