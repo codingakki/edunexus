@@ -57,7 +57,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 
-// ✅ Serve HTML pages directly for routes like /tutor or /marketplace
+// ✅ Serve HTML pages directly
 app.get("/marketplace", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/marketplace.html"));
 });
@@ -66,19 +66,12 @@ app.get("/tutor", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/tutor.html"));
 });
 
-app.get("/tutor/teach", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/teach.html"));
-});
-
-app.get("/tutor/study", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/study.html"));
-});
-
-// === YEH HAI NAYA ROUTE ===
+// Naya route jo humne add kiya tha
 app.get("/my-purchases", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/my-purchases.html"));
 });
-// ==========================
+
+// Faltu routes /tutor/teach aur /tutor/study HATA DIYE GAYE HAIN
 
 // ✅ 404 handler
 app.use((req, res, next) => {
