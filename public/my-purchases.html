@@ -2,12 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Purchases - Edunexus</title>
   <link rel="stylesheet" href="style.css" />
-  </head>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
 <body>
+
   <header>
-    </header>
+    <div class="header-inner">
+      <div class="logo"><a href="index.html">Edunexus</a></div>
+      <nav>
+        <a href="cart.html" id="cartLink">Cart</a>
+        <a href="index.html">Home</a>
+        <a href="marketplace.html">Marketplace</a>
+        <a href="tutor.html">Find Tutors</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html" id="loginLink" class="btn-login">Login</a>
+      </nav>
+    </div>
+  </header>
 
   <section class="marketplace-section">
     <h1>My Purchased Notes</h1>
@@ -17,95 +31,152 @@
   </section>
 
   <footer>
-    </footer>
+    <small>© <span id="year">2025</span> Edunexus. All rights reserved.</small>
+  </footer>
 
   <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
     const API_BASE = "https://edunexus-1-ewni.onrender.com";
 
-    // (Yahaan 'checkLoginState' function paste karein)
-    // --- Login State Logic (Updated) ---
-function checkLoginState() {
-  const token = localStorage.getItem("token");
-  const loginLink = document.getElementById("loginLink");
-  const cartLink = document.getElementById("cartLink");
-
-  // Agar header mein login link nahi hai (jaise payment page), toh kuch na karein
-  if (!loginLink) {
-    return;
-  }
-
-  const nav = loginLink.parentElement; // <nav> element
-
-  if (token) {
-    // User Logged-in hai
-    loginLink.textContent = "Logout"; 
-    loginLink.href = "#"; 
-    loginLink.classList.add("btn-logout"); 
-
-    // Check karein ki "My Purchases" link pehle se hai ya nahi (taaki duplicate na bane)
-    if (!document.querySelector('a[href="my-purchases.html"]')) {
-      // "My Purchases" link banayein
-      const purchasesLink = document.createElement('a');
-      purchasesLink.href = 'my-purchases.html';
-      purchasesLink.textContent = 'My Purchases';
-      // Ise 'loginLink' (jo ab 'Logout' hai) se pehle daalein
-      nav.insertBefore(purchasesLink, loginLink); 
+    // --- Login State Logic ---
+    function checkLoginState() {
+      const token = localStorage.getItem("token");
+      const loginLink = document.getElementById("loginLink");
+      const cartLink = document.getElementById("cartLink");
+      if (!loginLink) return;
+      const nav = loginLink.parentElement; 
+      if (token) {
+        loginLink.textContent = "Logout"; 
+        loginLink.href = "#"; 
+        loginLink.classList.add("btn-logout"); 
+        if (!document.querySelector('a[href="my-purchases.html"]')) {
+          const purchasesLink = document.createElement('a');
+          purchasesLink.href = 'my-purchases.html';
+          purchasesLink.textContent = 'My Purchases';
+          nav.insertBefore(purchasesLink, loginLink); 
+        }
+        loginLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = "index.html"; 
+        });
+      } else {
+        cartLink.style.display = "none"; 
+      }
     }
 
-    // Logout logic
-    loginLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      alert("Logged out successfully.");
-      window.location.href = "index.html"; 
-    });
-  } else {
-    // User Logged-out hai
-    cartLink.style.display = "none"; 
-  }
-}
-
+    // --- Purchases Load Logic ---
     async function loadPurchases() {
       const token = localStorage.getItem("token");
       const container = document.getElementById("purchasedList");
       if (!token) {
-        container.innerHTML = "<p>Please login to see your purchases.</p>";
+        container.innerHTML = "<p>Please <a href='login.html'>login</a> to see your purchases.</p>";
         return;
       }
 
       try {
-        // Hum '/api/auth/me' route use kar rahe hain
         const res = await fetch(`${API_BASE}/api/auth/me`, {
           headers: { 'Authorization': 'Bearer ' + token }
         });
+        if (!res.ok) throw new Error("Could not fetch user data");
         
         const user = await res.json();
-        
-        // 'user.purchases' ko populate karna hoga
-        // Iske liye humein backend route ko update karna hoga (Kadam 4)
         
         if (!user.purchases || user.purchases.length === 0) {
           container.innerHTML = "<p>You have not purchased any notes yet.</p>";
           return;
         }
 
+        // === YEH HAI FIX ===
         container.innerHTML = user.purchases.map(product => `
           <div class="product-card">
             <h3>${product.title}</h3>
             <p class="subject-tag">Subject: ${product.subject}</p>
             
-            <a href="${API_BASE}/api/products/download/${product._id}" class="btn-primary" style="text-decoration: none;">
+            <button class="btn-primary btn-download" 
+                    data-product-id="${product._id}" 
+                    data-filename="${product.filePath || 'notes.pdf'}">
               Download PDF
-            </a>
+            </button>
           </div>
         `).join('');
 
+        // Naye download buttons par listener lagayein
+        addDownloadListeners();
+        // ==================
+
       } catch (error) {
+        console.error(error);
         container.innerHTML = "<p>Failed to load purchases.</p>";
       }
     }
     
+    // === NAYA FUNCTION: Download buttons par listener add karne ke liye ===
+    function addDownloadListeners() {
+      document.querySelectorAll('.btn-download').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const productId = e.target.dataset.productId;
+          const filename = e.target.dataset.filename;
+          handleDownload(productId, filename, e.target); // Button ko pass karein
+        });
+      });
+    }
+
+    // === NAYA FUNCTION: Secure download handle karne ke liye ===
+    async function handleDownload(productId, filename, button) {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please login again.");
+        return;
+      }
+
+      // Button ko "Downloading..." state mein daalein
+      const originalText = button.textContent;
+      button.textContent = "Downloading...";
+      button.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/products/download/${productId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token // YEH SABSE ZAROORI HAI
+          }
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Download failed");
+        }
+
+        // File ko blob (binary data) mein convert karein
+        const blob = await res.blob();
+        
+        // JavaScript ka istemal karke temporary link banayein
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename; // File ka naam set karein
+        document.body.appendChild(a);
+        
+        // Link ko click karke download trigger karein
+        a.click();
+        
+        // Temporary link ko cleanup karein
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+      } catch (error) {
+        console.error("Download error:", error);
+        alert("❌ " + error.message);
+      } finally {
+        // Button ko wapas normal state mein laayein
+        button.textContent = originalText;
+        button.disabled = false;
+      }
+    }
+
+    // --- Page load hote hi run karein ---
     document.addEventListener("DOMContentLoaded", () => {
       checkLoginState();
       loadPurchases();
