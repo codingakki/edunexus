@@ -19,12 +19,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ===============================================
-// ✅ YEH HAI FIX: Path ko wapas "../public" kar diya hai
-// ===============================================
-app.use(express.static(path.join(__dirname, "../public")));
+// ✅ YEH HAI SAHI PATH
+// =AN (Bina "../") ================================
+// Path "server/public" par point karega
+app.use(express.static(path.join(__dirname, "public")));
 
-// ✅ Serve uploaded files
+// (Yeh path bhi check kar lein, yeh "server/uploads" hona chahiye)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// ===============================================
 
 // ✅ MongoDB Connection
 mongoose
@@ -56,29 +58,26 @@ app.use("/api/users", userRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/auth", authRoutes);
-//ab ye sabhi pages ke script ko update karo for my purchases
 app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 
 // ===============================================
-// ✅ YEH BHI FIX KIYA GAYA HAI
-// ===============================================git
-// Sabhi file paths mein "../" wapas add kar diya hai
+// ✅ YEH BHI FIX KIYA GAYA HAI (Bina "../")
+// ===============================================
 app.get("/marketplace", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/marketplace.html"));
+  res.sendFile(path.join(__dirname, "public/marketplace.html"));
 });
 
 app.get("/tutor", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/tutor.html"));
+  res.sendFile(path.join(__dirname, "public/tutor.html"));
 });
 
-// Woh extra routes (teach/study) yahaan nahi hain, jo sahi hai
-
-// Naya route jo humne add kiya tha
+// Naya route 
 app.get("/my-purchases", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/my-purchases.html"));
+  res.sendFile(path.join(__dirname, "public/my-purchases.html"));
 });
 // ===============================================
+
 
 // ✅ 404 handler
 app.use((req, res, next) => {
