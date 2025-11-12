@@ -6,9 +6,21 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   role: {
     type: String,
-    enum: ["student", "teacher", "admin"], // ✅ added student
+    enum: ["student", "teacher", "admin"],
     default: "student",
   },
+  
+  // ===================================
+  // ✅ YEH FIELD ADD KAREIN
+  // ===================================
+  purchases: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product" // Yeh Mongoose ko batata hai ki 'Product' model ko refer karna hai
+    }
+  ]
+  // ===================================
+
 });
 
 const User = mongoose.model("User", userSchema);
