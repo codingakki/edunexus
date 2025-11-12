@@ -106,7 +106,10 @@ function checkLoginState() {
       }
     }
     
-    document.addEventListener("DOMContentLoaded", loadPurchases);
+    document.addEventListener("DOMContentLoaded", () => {
+      checkLoginState();
+      loadPurchases();
+    });
   </script>
 </body>
 </html>
