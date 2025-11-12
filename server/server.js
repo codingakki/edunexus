@@ -20,13 +20,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // ===============================================
 // ✅ YEH HAI SAHI PATH
-// =AN (Bina "../") ================================
-// Path "server/public" par point karega
-app.use(express.static(path.join(__dirname, "public")));
-
-// (Yeh path bhi check kar lein, yeh "server/uploads" hona chahiye)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// (Aapka public folder server folder se "ek peeche" hai)
 // ===============================================
+app.use(express.static(path.join(__dirname, "../public")));
+
+// ✅ Serve uploaded files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ MongoDB Connection
 mongoose
@@ -62,22 +61,20 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 
 // ===============================================
-// ✅ YEH BHI FIX KIYA GAYA HAI (Bina "../")
+// ✅ YEH BHI FIX KIYA GAYA HAI ("../" ke saath)
 // ===============================================
 app.get("/marketplace", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/marketplace.html"));
+  res.sendFile(path.join(__dirname, "../public/marketplace.html"));
 });
 
 app.get("/tutor", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/tutor.html"));
+  res.sendFile(path.join(__dirname, "../public/tutor.html"));
 });
 
-// Naya route 
 app.get("/my-purchases", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/my-purchases.html"));
+  res.sendFile(path.join(__dirname, "../public/my-purchases.html"));
 });
 // ===============================================
-
 
 // ✅ 404 handler
 app.use((req, res, next) => {
