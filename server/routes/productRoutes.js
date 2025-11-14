@@ -1,13 +1,16 @@
 import express from "express";
 import Product from "../models/Product.js";
-import { authMiddleware } from "../middleware/auth.js"; // <-- Auth middleware import
-import path from "path"; // <-- Path module import
+import { authMiddleware } from "../middleware/auth.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// NOTE: Removed the old __dirname logic as it's not needed
-
-// ✅ GET all products (Public)
+// GET all products
 router.get("/", async (req, res) => {
   try {
     const products = await Product.find();
@@ -18,52 +21,51 @@ router.get("/", async (req, res) => {
   }
 });
 
-
-// ===============================================
-// ✅ SECURE DOWNLOAD ROUTE (Fixed)
-// ===============================================
+// SECURE DOWNLOAD ROUTE
 router.get("/download/:id", authMiddleware, async (req, res) => {
   try {
     const productId = req.params.id;
-    const user = req.user; // From authMiddleware
+    const user = req.user;
 
-    // 1. Check if user has purchased this item
+    // check purchase
     const hasPurchased = user.purchases.some(
-      (purchaseId) => purchaseId.toString() === productId
+      (p) => p.toString() === productId
     );
 
     if (!hasPurchased) {
-      return res.status(403).json({ error: "Access denied. You have not purchased this item." });
+      return res
+        .status(403)
+        .json({ error: "Access denied. You have not purchased this item." });
     }
 
-    // 2. Find product file path from database
+    // fetch product
     const product = await Product.findById(productId);
     if (!product || !product.filePath) {
       return res.status(404).json({ error: "File not found." });
     }
 
-    // 3. Create the full file path from the project root
-    // === FIX ===
-    // Use process.cwd() to get the root directory
-    // Path will be: <project_root>/private_notes/filename.pdf
-    const filePath = path.join(__dirname, "../private_notes", product.filePath);
+    // CORRECT FILE PATH (2 levels up)
+    const filePath = path.join(
+      __dirname,
+      "../../private_notes",
+      product.filePath
+    );
 
+    console.log("Downloading file from:", filePath);
 
-    // 4. Send the file for download
+    // send file
     res.download(filePath, product.filePath, (err) => {
       if (err) {
-        // This often happens if the file isn't found on the server's disk
         console.error("File download error:", err);
-        res.status(404).json({ error: "Error downloading file. File may not exist." });
+        return res
+          .status(404)
+          .json({ error: "Error downloading file. File may not exist." });
       }
     });
-
   } catch (err) {
-    console.error(err);
+    console.error("Server error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-
-// ✅ Export router
 export default router;
