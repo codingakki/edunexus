@@ -46,7 +46,8 @@ router.get("/download/:id", authMiddleware, async (req, res) => {
     // === FIX ===
     // Use process.cwd() to get the root directory
     // Path will be: <project_root>/private_notes/filename.pdf
-    const filePath = path.join(process.cwd(), "private_notes", product.filePath);
+    const filePath = path.join(__dirname, "../private_notes", product.filePath);
+
 
     // 4. Send the file for download
     res.download(filePath, product.filePath, (err) => {
